@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="six_arm">
+  <xacro:include filename="$(find mybot_description)/urdf/originbot_with_rgbd_gazebo_arm.xacro" />
+</robot>

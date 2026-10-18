@@ -1,0 +1,124 @@
+{
+  "seed": 20261018,
+  "layout": [
+    {
+      "model": "blue_cube_1",
+      "color": "blue",
+      "sector": 4,
+      "x": -1.9,
+      "y": 5.7,
+      "z": 0.025
+    },
+    {
+      "model": "red_cube_1",
+      "color": "red",
+      "sector": 3,
+      "x": -6.1,
+      "y": -1.5,
+      "z": 0.025
+    },
+    {
+      "model": "red_cube_2",
+      "color": "red",
+      "sector": 5,
+      "x": -0.1,
+      "y": -5.1,
+      "z": 0.025
+    },
+    {
+      "model": "red_cube_3",
+      "color": "red",
+      "sector": 0,
+      "x": -2.5,
+      "y": 0.9,
+      "z": 0.025
+    },
+    {
+      "model": "blue_cube_2",
+      "color": "blue",
+      "sector": 2,
+      "x": 2.3,
+      "y": -4.5,
+      "z": 0.025
+    },
+    {
+      "model": "red_cube_4",
+      "color": "red",
+      "sector": 1,
+      "x": 4.7,
+      "y": 5.1,
+      "z": 0.025
+    },
+    {
+      "model": "blue_cube_3",
+      "color": "blue",
+      "sector": 6,
+      "x": 4.1,
+      "y": 1.5,
+      "z": 0.025
+    },
+    {
+      "model": "blue_cube_4",
+      "color": "blue",
+      "sector": 6,
+      "x": 4.1,
+      "y": -0.9,
+      "z": 0.025
+    },
+    {
+      "model": "red_cube_5",
+      "color": "red",
+      "sector": 1,
+      "x": 5.3,
+      "y": 4.5,
+      "z": 0.025
+    },
+    {
+      "model": "blue_cube_5",
+      "color": "blue",
+      "sector": 0,
+      "x": -2.5,
+      "y": 2.1,
+      "z": 0.025
+    }
+  ],
+  "sector_anchors": [
+    [
+      -0.7,
+      0.9
+    ],
+    [
+      4.7,
+      4.5
+    ],
+    [
+      5.9,
+      -5.1
+    ],
+    [
+      -4.9,
+      -5.1
+    ],
+    [
+      -6.7,
+      5.1
+    ],
+    [
+      0.5,
+      -5.1
+    ],
+    [
+      4.1,
+      -0.3
+    ]
+  ],
+  "bounds": [
+    -7.0,
+    6.5,
+    -5.5,
+    6.0
+  ],
+  "minimum_spacing_m": 0.65,
+  "source": "map_safe_geodesic_partitions",
+  "sector_count": 7
+}

@@ -1,0 +1,42 @@
+# Project-local runtimes and generated data
+/docker-data/
+/docker-exec/
+/containerd-root/
+/containerd-state/
+/logs/
+/runtime-home/
+/downloads/
+/delivery/
+*.sock
+*.sock.*
+*.pid
+*.lock
+# Never distribute local or official model assets
+/competition/llm/
+/official-models/
+*.gguf
+*.safetensors
+*.onnx
+*.pt
+*.pth
+*.bin
+*llama-server*
+# Private adapter configuration / credentials
+.env
+.env.local
+/ros_ws/official-config.json
+*.pem
+*.key
+# Build/cache products anywhere
+build/
+install/
+log/
+__pycache__/
+*.pyc
+*.so
+*.o
+*.a
+CMakeCache.txt
+# Optional recordings
+*.mp4
+*.mkv

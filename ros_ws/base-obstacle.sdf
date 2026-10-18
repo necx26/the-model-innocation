@@ -1,0 +1,156 @@
+<sdf version='1.7'>
+  <model name='originbot'>
+    <link name='base_footprint'>
+      <inertial>
+        <pose>-0.032308 0 0.0857 0 -0 0</pose>
+        <mass>13</mass>
+        <inertia>
+          <ixx>0.108098</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.02478</ixz>
+          <iyy>0.230329</iyy>
+          <iyz>0</iyz>
+          <izz>0.139753</izz>
+        </inertia>
+      </inertial>
+      <collision name='base_footprint_fixed_joint_lump__base_link_collision'>
+        <pose>0 0 0.1034 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.32 0.32 0.1</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='base_footprint_fixed_joint_lump__back_caster_link_collision_1'>
+        <pose>-0.14 0 0.0267 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.0267</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <visual name='base_footprint_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.001 0.001 0.001</size>
+          </box>
+        </geometry>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__base_link_visual_1'>
+        <pose>0 0 0.1034 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.32 0.32 0.1</size>
+          </box>
+        </geometry>
+      </visual>
+      <visual name='base_footprint_fixed_joint_lump__back_caster_link_visual_2'>
+        <pose>-0.14 0 0.0267 0 -0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.0267</radius>
+          </sphere>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='left_wheel_joint' type='revolute'>
+      <pose relative_to='base_footprint'>0.14 0.185 0.0684 0 -0 0</pose>
+      <parent>base_footprint</parent>
+      <child>left_wheel_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='left_wheel_link'>
+      <pose relative_to='left_wheel_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3</mass>
+        <inertia>
+          <ixx>0.00379375</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00379375</iyy>
+          <iyz>0</iyz>
+          <izz>0.0063375</izz>
+        </inertia>
+      </inertial>
+      <collision name='left_wheel_link_collision'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='left_wheel_link_visual'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='right_wheel_joint' type='revolute'>
+      <pose relative_to='base_footprint'>0.14 -0.185 0.0684 0 -0 0</pose>
+      <parent>base_footprint</parent>
+      <child>right_wheel_link</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='right_wheel_link'>
+      <pose relative_to='right_wheel_joint'>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3</mass>
+        <inertia>
+          <ixx>0.00379375</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00379375</iyy>
+          <iyz>0</iyz>
+          <izz>0.0063375</izz>
+        </inertia>
+      </inertial>
+      <collision name='right_wheel_link_collision'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='right_wheel_link_visual'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>
