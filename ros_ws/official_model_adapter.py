@@ -1,7 +1,7 @@
 """Implement the organizer's model/SDK here once its specification is available.
 
-The callable runs in the ROS container. Install required dependencies in the
-Dockerfile, mount official assets separately, and keep credentials out of Git.
+The callable runs in the selected Humble runtime (native or container).
+Install official SDK dependencies there, mount model assets separately, and keep credentials private.
 Use bounded timeouts for SDK/network calls. This is NOT an official API schema.
 """
 

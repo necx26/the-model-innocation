@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -e
+# Colcon configures from cwd; CMake then resolves cwd to its Unicode real path.
+# Supply an explicit ASCII -B path while keeping every output in this project.
+if [[ ${1:-} == /* && -d "$1" && -n ${YZBOT_NATIVE_ROOT:-} ]]; then
+  actual_dir=$(pwd -P)
+  project_dir=$(realpath -- "$YZBOT_PROJECT")
+  case "$actual_dir" in
+    "$project_dir"/*) exec /usr/bin/cmake -B "$YZBOT_NATIVE_ROOT/${actual_dir#"$project_dir"/}" "$@" ;;
+  esac
+fi
+exec /usr/bin/cmake "$@"

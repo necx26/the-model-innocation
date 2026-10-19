@@ -25,11 +25,14 @@ from rclpy.qos import qos_profile_sensor_data, QoSProfile, DurabilityPolicy
 from rclpy.time import Time
 from geometry_msgs.msg import Twist, PoseStamped, Point, Point32, PolygonStamped
 from sensor_msgs.msg import Image, CameraInfo, JointState, LaserScan
-from nav_msgs.msg import Path
+from nav_msgs.msg import Path, OccupancyGrid
+from rosgraph_msgs.msg import Clock
 from nav2_msgs.action import NavigateToPose, Spin, BackUp
+from nav2_msgs.msg import SpeedLimit
+from control_msgs.action import FollowJointTrajectory
 from gazebo_msgs.msg import ModelStates, LinkStates, EntityState
 from gazebo_msgs.srv import SetEntityState
-from std_msgs.msg import String
+from std_msgs.msg import String, UInt32, Float32, Empty as EmptyMessage
 from std_srvs.srv import Empty
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from builtin_interfaces.msg import Duration
@@ -39,10 +42,12 @@ from linkattacher_msgs.srv import AttachLink, DetachLink
 from tf2_ros import Buffer, TransformListener
 from mission_strategy import MissionMap, ObjectMemory, plan_deliveries
 from model_adapter import invoke_official
+from scene_config import SCENE, ZONES, PATROLS, in_delivery_area
+from exam_bridge import generate_question, validate_exam_config
 
-BASE = FilePath('/home/ros/dev_ws')
-LOG = FilePath('/home/ros/logs')
-ZONES = {'A': (3., 1.), 'B': (3., 0.), 'C': (3., -1.)}
+BASE = FilePath(os.environ.get('YZBOT_WS') or FilePath(__file__).resolve().parent)
+LOG = FilePath(os.environ.get('YZBOT_LOG') or BASE/'logs')
+LOG.mkdir(parents=True, exist_ok=True)
 JOINTS = [f'joint{i}' for i in range(1, 7)]
 
 
@@ -74,7 +79,18 @@ class Competition(Node):
         self.observation_enabled = False
         self.perception_paused = False
         self.fixed_camera_images = {'overview': None, 'oblique': None}
+        self.clock_time = 0.
         self.scan_min = 99.
+        self.front_obstacle_range = 99.
+        self.front_range_time = 0.
+        self.front_range_history = deque(maxlen=3)
+        self.last_front_sample = None
+        self.front_closing_speed = 0.
+        self.speed_limit_mps = float(SCENE.get('cruise_speed_mps', 1.0))
+        self.speed_resume_since = None
+        self.speed_policy_label = '巡航'
+        self.slam_grid = None
+        self.slam_grid_time = 0.
         self.nav_handle = None
         self.cancel = threading.Event()
         self.busy = False
@@ -82,9 +98,10 @@ class Competition(Node):
         self.used = set()
         self.held_model = None
         self.task_mode = os.environ.get('YZBOT_TASK_MODE', 'practice')
-        if self.task_mode not in ('practice', 'official'):
+        if self.task_mode not in ('practice', 'official', 'exam'):
             raise ValueError('YZBOT_TASK_MODE 必须为 practice 或 official')
         self.official_input = None
+        self.exam_config = validate_exam_config(dict(SCENE['exam']))
         self.trace, self.plan = [], []
         self.state = {'mode': '本地练习 · Gazebo 真值定位 · 官方接口待提供', 'phase': '就绪',
                       'status': '等待开始随机任务', 'question': '', 'task': None,
@@ -96,7 +113,13 @@ class Competition(Node):
             self.state.update(mode='官方模型适配模式 · Gazebo 真值定位 · 接口需配置',
                               status='等待官方题目和已实现的官方模型适配器',
                               llm='官方模型适配器（需对接验证）')
-        self.buffer = Buffer()
+        if self.task_mode == 'exam':
+            self.state.update(mode='出题程序考试 · Qwen工具联调 · Gazebo真值定位',
+                              status='赛前确认映射规则和顺序，随机复位后点击开始考试', llm='Qwen + 数学工具（本地联调）')
+        self.state['exam_config'] = self.exam_config
+        self.state['localization']=os.environ.get('YZBOT_LOCALIZATION','truth')
+        if self.state['localization']=='slam':self.state['mode']=self.state['mode'].replace('Gazebo真值定位','激光SLAM与仿真里程计')
+        self.buffer = Buffer(node=self)
         self.listener = TransformListener(self.buffer, self)
         self.create_subscription(ModelStates, '/demo/model_states_demo', self.model_cb, 10)
         self.create_subscription(LinkStates, '/demo/link_states_demo', self.link_cb, 10)
@@ -108,17 +131,31 @@ class Competition(Node):
                                      lambda m, name=view: self.fixed_image_cb(name, m),
                                      qos_profile_sensor_data)
         self.create_subscription(LaserScan, '/scan', self.scan_cb, qos_profile_sensor_data)
+        self.create_subscription(Clock, '/clock', lambda _: setattr(self, 'clock_time', time.monotonic()), qos_profile_sensor_data)
         self.create_subscription(Path, '/plan', self.plan_cb, 10)
+        self.create_subscription(OccupancyGrid, '/map', self.map_cb,
+                                 QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL))
         self.vel = self.create_publisher(Twist, '/cmd_vel_nav', 10)
         self.stop_vel = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.speed_limit_pub = self.create_publisher(SpeedLimit, '/competition/speed_limit', 10)
         self.arm_pub = self.create_publisher(JointTrajectory, '/arm_controller/joint_trajectory', 10)
         self.grip_pub = self.create_publisher(JointTrajectory, '/gripper_controller/joint_trajectory', 10)
         qos = QoSProfile(depth=1, durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.pubs = {n: self.create_publisher(String, '/competition/'+n, qos)
                      for n in ['task', 'status', 'detections', 'events', 'voice_text']}
+        self.telemetry = {}
+        for name, kind in [('question',String),('order',String),('red_count',UInt32),('blue_count',UInt32),
+                           ('red_zone',String),('blue_zone',String),('progress',UInt32),('work_state',String),
+                           ('gripper_state',String),('work_phase',String),('gripper_code',String),('remaining',Float32)]:
+            self.telemetry[name] = (self.create_publisher(kind, '/competition/'+name, qos), kind)
+        self.annotated_pub = self.create_publisher(Image, '/competition/annotated_image', qos_profile_sensor_data)
+        self.create_subscription(EmptyMessage, '/competition/start_exam', lambda _: self.start(), 10)
+        self.create_subscription(EmptyMessage, '/competition/stop', lambda _: self.stop(), 10)
+        self.create_timer(.2, self.publish_overlay)
         self.command_pub = self.create_publisher(String, '/llama_command', qos)
         self.path_pub = self.create_publisher(Path, '/competition/path', 10)
         self.nav = ActionClient(self, NavigateToPose, '/navigate_to_pose')
+        self.arm_action = ActionClient(self, FollowJointTrajectory, '/arm_controller/follow_joint_trajectory')
         self.spin_action = ActionClient(self, Spin, '/spin')
         self.backup_action = ActionClient(self, BackUp, '/backup')
         self.ik = self.create_client(GetPositionIK, '/compute_ik')
@@ -132,6 +169,7 @@ class Competition(Node):
         self.footprint_pub=self.create_publisher(PolygonStamped,'/competition/footprint',10)
         self.create_timer(.2,self.publish_footprint)
         self.create_timer(.2,self.observe_scene)
+        self.create_timer(.2,self.update_dynamic_speed)
 
     def publish_footprint(self):
         # Body-relative, unstamped footprint remains valid after long arm work.
@@ -167,6 +205,16 @@ class Competition(Node):
         a = a.reshape(msg.height, msg.width, 3)
         self.fixed_camera_images[view] = cv2.cvtColor(a, cv2.COLOR_RGB2BGR) if msg.encoding == 'rgb8' else a.copy()
 
+    def publish_overlay(self):
+        if self.image is None or self.image_stamp is None:return
+        img=self.image.copy()
+        for d in self.state.get('detections',[]):
+            x,y,w,h=d['box'];cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
+            cv2.putText(img,d['color'],(x,max(14,y-4)),cv2.FONT_HERSHEY_SIMPLEX,.45,(0,255,0),1)
+        msg=Image();msg.header.stamp=self.image_stamp;msg.header.frame_id='camera_link'
+        msg.height,msg.width=img.shape[:2];msg.encoding='bgr8';msg.step=msg.width*3;msg.data=img.tobytes()
+        self.annotated_pub.publish(msg)
+
     def observe_scene(self):
         if not self.observation_enabled or self.perception_paused or self.image_stamp is None:return
         try:
@@ -189,7 +237,121 @@ class Competition(Node):
             self.state['perception_note']=str(e)
 
     def scan_cb(self, msg):
-        self.scan_min = min((v for v in msg.ranges if math.isfinite(v) and v > msg.range_min), default=99.)
+        valid=[v for v in msg.ranges if math.isfinite(v) and msg.range_min < v < msg.range_max]
+        self.scan_min=min(valid,default=99.)
+        front=[]
+        angle=msg.angle_min
+        for value in msg.ranges:
+            if abs((angle+math.pi)%(2*math.pi)-math.pi) <= .35 and math.isfinite(value) and msg.range_min < value < msg.range_max:
+                front.append(float(value))
+            angle+=msg.angle_increment
+        if len(front)<3:
+            return
+        # A short percentile suppresses isolated lidar speckles while retaining a car
+        # that occupies several neighboring rays in the forward corridor.
+        distance=float(np.percentile(front,10))
+        now=time.monotonic()
+        self.front_range_history.append(distance)
+        filtered=float(np.median(self.front_range_history))
+        if self.last_front_sample:
+            previous_time,previous_distance=self.last_front_sample
+            dt=now-previous_time
+            if .03<dt<1.0:
+                raw_closing=(previous_distance-filtered)/dt
+                # Patrol vehicles are slow relative to the 1 m/s base; cap scan-rate
+                # spikes caused by turning past walls so they cannot create false TTCs.
+                raw_closing=max(-1.3,min(1.3,raw_closing))
+                self.front_closing_speed=.65*self.front_closing_speed+.35*raw_closing
+        self.last_front_sample=(now,filtered)
+        self.front_obstacle_range=filtered
+        self.front_range_time=now
+
+    def update_dynamic_speed(self):
+        """TTC speed guard: use full cruise when clear/receding, yield when closing."""
+        cruise=float(SCENE.get('cruise_speed_mps',1.0))
+        active=bool(self.busy and self.nav_handle is not None)
+        stale=time.monotonic()-self.front_range_time>.75
+        distance=self.front_obstacle_range
+        closing=max(0.,self.front_closing_speed)
+        ttc=distance/closing if closing>.05 and distance<90 else float('inf')
+        label='巡航/安全通行'
+        proposed=cruise
+        if active and stale:
+            proposed=min(.25,cruise);label='雷达数据过期，保守限速'
+        elif active:
+            if distance<.48 or (ttc<.75 and distance<1.5):
+                proposed=min(.10,cruise);label='紧急减速/等待'
+            elif distance<.85 or (ttc<1.35 and distance<2.0):
+                proposed=min(.30,cruise);label='减速让行'
+            elif distance<1.35 or (ttc<2.0 and distance<2.6):
+                proposed=min(.60,cruise);label='谨慎通过'
+            elif self.front_closing_speed < -.18 and distance<1.8:
+                proposed=cruise;label='障碍远离，恢复巡航'
+        # Decelerate immediately; only restore speed after the forward gap stays safe.
+        if proposed<self.speed_limit_mps-.03:
+            self.speed_limit_mps=proposed
+            self.speed_resume_since=None
+        elif proposed>self.speed_limit_mps+.03:
+            safe_gap=(distance>1.6 or self.front_closing_speed<-.18 or ttc>3.2)
+            if not active or safe_gap:
+                if self.speed_resume_since is None:self.speed_resume_since=time.monotonic()
+                if time.monotonic()-self.speed_resume_since>=.6:
+                    self.speed_limit_mps=proposed
+                    self.speed_resume_since=None
+            else:
+                self.speed_resume_since=None
+        else:
+            self.speed_resume_since=None
+        if self.speed_limit_mps<=.12:
+            label='紧急减速/等待'
+        elif self.speed_limit_mps<=.31:
+            label='减速让行'
+        elif self.speed_limit_mps<=.61:
+            label='谨慎通过'
+        old_label=self.state.get('dynamic_obstacle_policy')
+        old_limit=self.state.get('dynamic_speed_limit_mps')
+        self.state['dynamic_obstacle_policy']=label
+        self.state['dynamic_speed_limit_mps']=round(self.speed_limit_mps,2)
+        self.state['dynamic_front_range_m']=round(distance,2) if distance<90 else None
+        self.state['dynamic_closing_speed_mps']=round(self.front_closing_speed,2)
+        self.state['dynamic_ttc_s']=round(ttc,2) if math.isfinite(ttc) else None
+        if label!=old_label or old_limit is None or abs(self.speed_limit_mps-float(old_limit))>=.1:
+            self.event('动态障碍速度决策',decision=label,speed_limit_mps=round(self.speed_limit_mps,2),
+                       front_range_m=round(distance,2),closing_speed_mps=round(self.front_closing_speed,2),
+                       ttc_s=round(ttc,2) if math.isfinite(ttc) else None)
+        message=SpeedLimit()
+        message.header.stamp=self.get_clock().now().to_msg()
+        message.percentage=False
+        message.speed_limit=float(self.speed_limit_mps)
+        self.speed_limit_pub.publish(message)
+
+    def map_cb(self, msg):
+        self.slam_grid = msg
+        self.slam_grid_time = time.monotonic()
+
+    def map_view(self):
+        """Real ROS /map, with odom overlays transformed into the map frame."""
+        import base64
+        msg = self.slam_grid
+        if msg is None:
+            raise ValueError('等待 ROS /map 数据')
+        info = msg.info
+        values = np.asarray(msg.data, dtype=np.int16).reshape(info.height, info.width)
+        pixels = np.where(values < 0, 185, 255 - np.clip(values, 0, 100) * 2.55).astype(np.uint8)
+        png = cv2.imencode('.png', np.flipud(pixels))[1].tobytes()
+        tf = self.buffer.lookup_transform(msg.header.frame_id, 'odom', Time()).transform
+        q = tf.rotation
+        yaw = math.atan2(2*(q.w*q.z+q.x*q.y), 1-2*(q.y*q.y+q.z*q.z))
+        return dict(image='data:image/png;base64,'+base64.b64encode(png).decode(),
+                    frame=msg.header.frame_id, width=info.width, height=info.height,
+                    resolution=info.resolution,
+                    origin=[info.origin.position.x, info.origin.position.y],
+                    origin_yaw=math.atan2(2*(info.origin.orientation.w*info.origin.orientation.z+
+                                           info.origin.orientation.x*info.origin.orientation.y),
+                                          1-2*(info.origin.orientation.y**2+info.origin.orientation.z**2)),
+                    map_from_odom=[tf.translation.x, tf.translation.y, yaw],
+                    age=round(time.monotonic()-self.slam_grid_time, 1),
+                    known_cells=int(np.count_nonzero(values >= 0)))
 
     def plan_cb(self, msg):
         self.plan = [[p.pose.position.x, p.pose.position.y] for p in msg.poses]
@@ -227,19 +389,33 @@ class Competition(Node):
         if self.busy:
             s['elapsed'] = round(self.elapsed(), 1)
             s['remaining'] = max(0., round(300-self.elapsed(), 1))
-        s.update(path=self.trace[-2500:], plan=self.plan, scan_min=round(self.scan_min, 3),
+        s.update(busy=self.busy, path=self.trace[-2500:], plan=self.plan, scan_min=round(self.scan_min, 3),
                  known_targets=self.memory.snapshot(),
                  search_coverage=round(100*float(np.mean(self.search_seen)),1),
-                 search_bounds=self.field.bounds,
+                 search_bounds=self.field.bounds, zones=ZONES, patrols=PATROLS, exam_config=self.exam_config,
                  camera_age=round(time.monotonic()-self.image_time, 1),
                  robot=self.robot_pose(),
                  cubes=[{'name': n, 'x': p.position.x, 'y': p.position.y, 'z': p.position.z}
                         for n, p in self.models.items() if n.startswith(('red_cube', 'blue_cube'))],
                  obstacles=[{'name': n, 'x': p.position.x, 'y': p.position.y}
                             for n, p in self.models.items() if n in ['Move1', 'Move2']])
+        issues=[]
+        if s['robot'] is None:issues.append('缺少 odom→base_control 坐标变换')
+        if self.image is None or s['camera_age']>3:issues.append('前置相机没有新图像')
+        if time.monotonic()-self.clock_time>3:issues.append('Gazebo 仿真时钟停止')
+        if self.state['localization']=='slam' and (self.slam_grid is None or time.monotonic()-self.slam_grid_time>5):issues.append('SLAM 地图没有更新')
+        s.update(healthy=not issues,health_issues=issues,runtime_project=str(BASE.parent))
         return s
 
     def publish_status(self):
+        task = self.state.get('task') or {}
+        data = dict(question=self.state.get('question',''), order=('红→蓝' if task.get('first')=='red' else '蓝→红') if task else '',
+                    red_count=task.get('red',0), blue_count=task.get('blue',0),
+                    red_zone=task.get('red_zone','待解题'), blue_zone=task.get('blue_zone','待解题'),
+                    progress=self.state['placed'], work_state=self.state['phase']+'：'+self.state['status'],
+                    gripper_state=self.state['gripper'], work_phase=self.state['phase'],
+                    gripper_code='holding' if self.held_model else ('closed' if self.state['gripper']=='闭合' else 'released'), remaining=float(max(0,300-self.elapsed())) if self.started else 300.)
+        for name,(publisher,kind) in self.telemetry.items():publisher.publish(kind(data=data[name]))
         self.emit('status', {k:v for k,v in self.snapshot().items() if k not in ['events','path','plan','cubes']})
 
     def check(self):
@@ -435,13 +611,21 @@ class Competition(Node):
             raise RuntimeError(f'MoveIt 规划失败: {result.error_code.val}')
         traj=result.trajectory.joint_trajectory
         traj.header.stamp=Time().to_msg()
-        self.arm_pub.publish(traj)
+        if not self.arm_action.wait_for_server(timeout_sec=2):raise RuntimeError('机械臂动作控制器不可用')
+        goal=FollowJointTrajectory.Goal(trajectory=traj)
+        handle=self.wait(self.arm_action.send_goal_async(goal),5)
+        if not handle.accepted:raise RuntimeError('机械臂控制器拒绝轨迹')
+        pending=handle.get_result_async()
         duration=traj.points[-1].time_from_start
         deadline=time.monotonic()+max(8,duration.sec+duration.nanosec/1e9+5)
         stable=0
         while time.monotonic()<deadline:
             self.check()
             err=max(abs(self.joints.get(j,99)-v) for j,v in zip(JOINTS,values))
+            if pending.done():
+                outcome=pending.result()
+                if outcome.status==4 and err<.06:return
+                if outcome.status!=4:raise RuntimeError('机械臂动作失败：'+outcome.result.error_string)
             stable=stable+1 if err<.04 else 0
             if stable>=5:return
             time.sleep(.08)
@@ -449,6 +633,39 @@ class Competition(Node):
 
     def arm_xyz(self,x,y,z):
         self.arm(self.solve_ik(x,y,z))
+
+    def retreat_after_drop(self):
+        """Back away from a placed object after the arm has been stowed."""
+        if not self.backup_action.wait_for_server(timeout_sec=2):
+            self.event('放置后未能后退',reason='Nav2 BackUp 行为不可用')
+            return False
+        for distance in (.30, .15):
+            if self.cancel.is_set() or (self.started and self.elapsed() >= 300):
+                return False
+            try:
+                goal=BackUp.Goal(target=Point(x=distance),speed=.20,
+                                 time_allowance=Duration(sec=8))
+                handle=self.wait(self.backup_action.send_goal_async(goal),5)
+                self.nav_handle=handle
+                if not handle.accepted:
+                    self.event('放置后后退被拒绝',distance=distance)
+                    self.nav_handle=None
+                    continue
+                result=self.wait(handle.get_result_async(),10)
+                self.nav_handle=None
+                if result.status==4:
+                    self.event('放置后安全后退',distance=distance,speed=.20)
+                    return True
+                self.event('放置后后退未完成',distance=distance,status=result.status)
+            except Exception as e:
+                if self.nav_handle:
+                    try:self.nav_handle.cancel_goal_async()
+                    except Exception:pass
+                self.nav_handle=None
+                if self.cancel.is_set() or (self.started and self.elapsed() >= 300):
+                    return False
+                self.event('放置后后退未完成',distance=distance,reason=str(e))
+        return False
 
     def grip(self, closed):
         m=JointTrajectory(joint_names=['finger_joint1'])
@@ -491,7 +708,7 @@ class Competition(Node):
                 if np.linalg.norm(point[:2]-org[:2])>2.5:continue
                 rp=self.robot_pose()
                 if rp and math.hypot(point[0]-rp[0],point[1]-rp[1])<.40:continue
-                if 2.45<point[0]<3.7 and abs(point[1])<1.55:continue
+                if in_delivery_area(point, extra=.1):continue
                 cell=self.field.cell(point)
                 if not self.field.inside(cell) or self.field.clearance[cell]<.08:continue
                 result.append({'color':color,'x':float(point[0]),'y':float(point[1]),'z':.025,'pixel':[u,v],
@@ -503,6 +720,12 @@ class Competition(Node):
     def llm_task(self):
         if self.task_mode == 'practice':
             return self.practice_task()
+        if self.task_mode == 'exam':
+            value=generate_question(BASE.parent/'competition/platform/TMSCQtest_x86_x64.bin', self.exam_config)
+            self.state['question']=value['question']
+            self.official_input=value
+            (LOG/'exam-question.json').write_text(json.dumps(value,ensure_ascii=False,indent=2))
+            self.event('已读取出题程序原题',question=value['question'],rule=self.exam_config['rule'],first=self.exam_config['first'])
         with self.lock:
             value = copy.deepcopy(self.official_input)
         if value is None:
@@ -510,7 +733,7 @@ class Competition(Node):
         self.state['question'] = value['question']
         task = invoke_official(value['question'], value['context'])
         self.state['task'] = task
-        self.emit('task', {'question': value['question'], **task, 'source': 'official_adapter'})
+        self.emit('task', {'question': value['question'], **task, 'source': 'exam_generator_with_model_adapter' if self.task_mode=='exam' else 'official_adapter'})
         self.command_pub.publish(String(data=json.dumps(task)))
         return task
 
@@ -721,8 +944,9 @@ class Competition(Node):
 
     def run(self):
         try:
-            self.update('大模型解题','等待官方模型适配器解题' if self.task_mode=='official' else '随机题目已生成，等待本地 Qwen 解题')
+            self.update('大模型解题','正在运行出题程序并调用模型解题' if self.task_mode=='exam' else ('等待官方模型适配器解题' if self.task_mode=='official' else '随机题目已生成，等待本地 Qwen 解题'))
             task=self.llm_task()
+            self.check()
             self.event('大模型已输出并通过校验',answer=task)
             self.update('离开出生点','先后退 0.40 m，为安全搜索留出空间')
             if not self.backup_action.wait_for_server(timeout_sec=3):raise RuntimeError('后退行为不可用')
@@ -788,6 +1012,9 @@ class Competition(Node):
                 self.arm_xyz(px,py,.30)
                 rp=self.robot_pose()
                 self.arm_xyz(rp[0]+.10*math.cos(rp[2]),rp[1]+.10*math.sin(rp[2]),.43)
+                # The placed item is in front of the chassis. Retreat before starting
+                # the next route so the base and arm do not sweep through the drop zone.
+                self.retreat_after_drop()
                 self.perception_paused=False
             self.update('完成','5 个分散货物已按指令完成搜索、抓取和放置')
         except Exception as e:
@@ -810,10 +1037,10 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path=self.path.split('?')[0]
         if path=='/api/state':return self.reply(json.dumps(app.snapshot(),ensure_ascii=False).encode())
-        if path=='/api/image':
+        if path in ('/api/image', '/api/image/raw'):
             if app.image is None:return self.reply(b'',code=503)
             image=app.image.copy()
-            for d in app.state['detections']:
+            for d in app.state['detections'] if path=='/api/image' else []:
                 x,y,w,h=d['box'];cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),2)
             return self.reply(cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,75])[1].tobytes(),'image/jpeg')
         if path in ['/api/camera/overview', '/api/camera/oblique']:
@@ -821,17 +1048,34 @@ class Handler(BaseHTTPRequestHandler):
             image=app.fixed_camera_images.get(view)
             if image is None:return self.reply(b'',kind='image/jpeg',code=503)
             return self.reply(cv2.imencode('.jpg',image,[cv2.IMWRITE_JPEG_QUALITY,75])[1].tobytes(),'image/jpeg')
+        if path=='/api/slam-map':
+            try:
+                return self.reply(json.dumps(app.map_view(),ensure_ascii=False).encode())
+            except Exception as error:
+                return self.reply(json.dumps({'error':str(error)},ensure_ascii=False).encode(),code=503)
         if path=='/api/map':
             raw=cv2.imread(str(BASE/'src/yzbot/bot_navigation/maps/map.pgm'),0)
             # Real occupancy map crop: x -4..5, y -3..3, 0.05m/pixel, origin -50,-50.
             xmin,xmax,ymin,ymax=app.field.bounds
             raw=raw[raw.shape[0]-1-round((ymax+50)/.05):raw.shape[0]-round((ymin+50)/.05),round((xmin+50)/.05):round((xmax+50)/.05)+1]
             return self.reply(cv2.imencode('.png',raw)[1].tobytes(),'image/png')
+        if path=='/fpv':return self.reply(b'<!doctype html><meta charset=utf-8><title>Robot FPV</title><style>body{margin:0;background:#111;color:white;font:18px sans-serif}img{width:100vw;height:90vh;object-fit:contain}p{margin:6px}</style><img id=i><p id=s></p><script>setInterval(()=>i.src="/api/image?t="+Date.now(),180);setInterval(async()=>{let a=await(await fetch("/api/state")).json();s.textContent=a.phase+" | "+a.status+" | "+a.placed+"/5"},600)</script>','text/html; charset=utf-8')
         if path=='/':return self.reply((BASE/'competition.html').read_bytes(),'text/html; charset=utf-8')
         self.reply(b'not found',code=404)
 
     def do_POST(self):
         parsed=urlsplit(self.path)
+        if parsed.path=='/api/exam-config':
+            try:
+                size=int(self.headers.get('Content-Length','0'))
+                if not 0<size<=4096:raise ValueError('配置大小不合法')
+                config=validate_exam_config(json.loads(self.rfile.read(size)))
+                with app.lock:
+                    if app.busy:raise ValueError('运行期间不能修改考试配置')
+                    app.exam_config=config;app.state['exam_config']=config
+            except (ValueError,TypeError,KeyError) as error:
+                return self.reply(json.dumps({'error':str(error)},ensure_ascii=False).encode(),code=400)
+            return self.reply(b'{"configured":true}')
         if parsed.path=='/api/task':
             try:
                 size=int(self.headers.get('Content-Length','0'))

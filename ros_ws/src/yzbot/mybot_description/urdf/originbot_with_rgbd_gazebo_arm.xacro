@@ -49,6 +49,40 @@
     <xacro:property name="camera_offset_y" value="0.16" />
     <xacro:property name="camera_offset_z" value="0.30" />
 
+    <!-- Raised camera needs a visible mounting mast, fixed to the original chassis. -->
+    <link name="camera_mount_link">
+        <inertial>
+            <origin xyz="0 0 0.12" />
+            <mass value="0.04" />
+            <inertia ixx="0.00021" ixy="0" ixz="0" iyy="0.00021" iyz="0" izz="0.000003" />
+        </inertial>
+        <visual name="camera_mount_foot">
+            <origin xyz="-0.025 -0.018 0" />
+            <geometry><box size="0.10 0.07 0.012" /></geometry>
+            <material name="black" />
+        </visual>
+        <visual name="camera_mount_mast">
+            <origin xyz="0 0 0.115" />
+            <geometry><cylinder radius="0.009" length="0.23" /></geometry>
+            <material name="black" />
+        </visual>
+        <collision name="camera_mount_mast_collision">
+            <origin xyz="0 0 0.115" />
+            <geometry><cylinder radius="0.009" length="0.23" /></geometry>
+        </collision>
+        <visual name="camera_mount_head">
+            <origin xyz="0 0 0.23" />
+            <geometry><box size="0.035 0.04 0.025" /></geometry>
+            <material name="black" />
+        </visual>
+    </link>
+    <joint name="camera_mount_joint" type="fixed">
+        <origin xyz="${camera_offset_x} ${camera_offset_y} ${base_height/2}" />
+        <parent link="base_link" />
+        <child link="camera_mount_link" />
+    </joint>
+    <gazebo reference="camera_mount_link"><material>Gazebo/Black</material></gazebo>
+
     <joint name="camera_joint" type="fixed">
         <origin xyz="${camera_offset_x} ${camera_offset_y} ${camera_offset_z}" rpy="0 0.60 -0.35" />
         <parent link="base_link" />

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=机器人比赛仿真
+Comment=启动 Gazebo、机器人控制和比赛可视化
+Exec=python3 -c "import pathlib,subprocess,sys; p=pathlib.Path(sys.argv[1]).resolve().parent; subprocess.run([str(p/'桌面启动.sh')],cwd=p,check=True)" %k
+Icon=applications-system
+Terminal=true
+StartupNotify=false

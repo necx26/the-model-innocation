@@ -4,6 +4,12 @@ from glob import glob
 
 package_name = 'mybot_description'
 
+world_files = []
+for folder, _, filenames in os.walk('worlds'):
+    if filenames:
+        world_files.append((os.path.join('share', package_name, folder),
+                            [os.path.join(folder, name) for name in filenames]))
+
 setup(
     name=package_name,
     version='0.0.0',
@@ -15,8 +21,7 @@ setup(
         # urdf xacro files
         (os.path.join('share', package_name, 'urdf'), glob(os.path.join('urdf', '*.*'))),
         # world files
-        (os.path.join('share', package_name, 'worlds'), glob(os.path.join('worlds', '*.*'))),
-    ],
+    ] + world_files,
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ros',

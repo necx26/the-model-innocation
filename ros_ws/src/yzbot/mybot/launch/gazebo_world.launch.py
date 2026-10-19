@@ -1,6 +1,6 @@
 import os
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, RegisterEventHandler
+from launch.actions import ExecuteProcess, RegisterEventHandler, Shutdown
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
  
@@ -24,13 +24,19 @@ def generate_launch_description():
     urdf_model_path = os.path.join(pkg_share, f'urdf/{urdf_name}')
     world_file_path = os.path.join(pkg_share, f'worlds/{world_file_path}')
  
-    # Start Gazebo server
-    start_gazebo_cmd =  ExecuteProcess(
-        cmd=['gazebo', '--verbose',
-             world_file_path,
-             '-s', 'libgazebo_ros_init.so', 
+    # Keep the physics/camera server independent of the optional GUI client.
+    # Closing the Gazebo window must not freeze all ROS camera streams.
+    start_gazebo_cmd = ExecuteProcess(
+        cmd=['gzserver', '--verbose', world_file_path,
+             '-s', 'libgazebo_ros_init.so',
              '-s', 'libgazebo_ros_factory.so'],
         output='screen')
+    start_gazebo_gui_cmd = ExecuteProcess(
+        cmd=['gzclient', '--verbose'], output='screen')
+    server_exit = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=start_gazebo_cmd,
+            on_exit=[Shutdown(reason='Gazebo physics server exited')]))
  
  
     # 因为 urdf文件中有一句 $(find mybot) 需要用xacro进行编译一下才行
@@ -115,11 +121,13 @@ def generate_launch_description():
     
     ld = LaunchDescription()
  
+    ld.add_action(server_exit)
     ld.add_action(close_evt1)
     ld.add_action(close_evt2)
     ld.add_action(close_evt3)
  
     ld.add_action(start_gazebo_cmd)
+    ld.add_action(start_gazebo_gui_cmd)
     ld.add_action(node_robot_state_publisher)
     ld.add_action(spawn_entity_cmd)
  

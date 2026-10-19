@@ -1,285 +1,223 @@
-# yzbot 比赛仿真：使用说明、原理与部署
+# 机器人比赛个人版：启动、使用与部署
 
-**赛道名称：** 算法应用赛  
-**赛题名称：** 大模型技术创新赛  
-**参赛编号：** 待填写  
-**团队名称：** 待填写  
-**团队成员：** 待填写
+这是一个独立的个人工程目录。源码、机器人模型、地图、图片贴图、出题程序、可视化、启动脚本及 Ubuntu22.04/Humble 容器镜像都放在这里。当前版保持原 yzbot 小车和机械臂、原地图隔板；物体每轮随机分散到多个隔间，A/B/C 放置区固定。
 
-> 正式比赛使用比赛平台/组委会提供的模型。本地 Qwen 只作开发测试，不是比赛模型；GitHub 源码包不含 Qwen 权重及本地推理程序。
+**本地 Qwen 只用于测试；正式比赛使用官方给定模型。包内不包含 Qwen 权重、llama-server、官方模型或 API 密钥。** 官方模型适配接口保留，未接入时不能宣称已经完成正式模型对接。
 
-本文是可随工程副本转交的主说明，包含使用方法、运行原理、部署步骤和后续官方模型接入说明。命令均从包含 `start.sh` 的项目根目录执行，不依赖特定用户账户或本机绝对路径。当前验证环境采用 Linux 图形桌面，Gazebo Classic 与 ROS 2 Humble 运行在 Ubuntu 22.04 容器中。
+## 1. U 盘 Ubuntu 桌面：双击启动
 
-## 1. 快速启动
-
-### 首次部署
+在 U 盘桌面的“机器人比赛个人版”文件夹里，双击 **`机器人比赛仿真.desktop`**。如果系统提示不信任启动器，右键它，选择“允许启动 / Allow Launching”，再双击。`.sh` 是给终端执行的脚本，文件管理器提示没有应用时不要用文本编辑器打开；命令行方式如下：
 
 ```bash
-git clone https://github.com/necx26/the-model-innocation.git
-cd the-model-innocation
-# 先按第 6 节安装 Docker/containerd；构建可能需要较长时间
-./build.sh
+cd "$HOME/桌面/机器人比赛个人版"
+./启动.sh
 ```
 
-### 本地比赛练习模式
+首次会导入包内 Humble/Gazebo 环境并编译程序，约需几分钟。容器方式如提示 sudo 密码，输入当前 Linux 账户密码。看到「全部启动就绪」后，Gazebo 和之前的本地可视化页面会打开。
 
-进入解压后的项目目录，在终端执行：
+页面地址：**http://127.0.0.1:8765/**。若浏览器未自动打开，在Firefox地址栏输入此地址；已有旧页面时按 F5。
+
+### 页面布局
+
+在正常桌面窗口中，界面使用整个浏览器可视高度：左侧同时显示第一人称原图、目标识别图、两个固定机位；中间是 SLAM 地图与导航路径；右侧是进度、倒计时、任务、夹爪和操作按钮；底部是任务播报。配置放在右上角「考试配置」弹窗，不占主要画面。极窄的手机窗口会改为纵向排列。
+
+第一人称和两个固定机位都是真实 Gazebo 相机，网页中的机器人画面使用原模型。地图来自 ROS `/map`；如果在线地图不可用，会明确标注先验地图。三维视角旋转在 Gazebo 窗口操作。无需 Foxglove、账号或 JSON 手动导入。
+
+### 开始任务
+
+1. 等待右上角显示机器人已连接、状态为「就绪」。
+2. 点「考试配置」，确认裁判指定的映射规则和先搬颜色，点击「应用配置」，关闭弹窗。
+3. 点击「开始考试」。此时调用提供的出题程序、让配置的模型解题，并开始 300 秒计时。
+4. 下一轮先点「随机重置」。固定放置区和地图隔板不改变，红蓝物体重新分散。
+
+也可以在同一工程目录通过终端操作：
 
 ```bash
-./competition-start.sh
+# 开始：此处规则1、先红色只是命令示例，以裁判要求为准
+./开始考试.sh --rule 1 --first red
+
+# 新一轮随机场景（当前任务运行时先在页面停止作业）
+./随机重置.sh
+
+# 单独打开第一人称大画面
+./第一人称.sh
+
+# 关闭本工程全部运行程序
+./停止.sh
 ```
 
-它会启动项目自带的隔离 Docker/containerd 数据目录、Ubuntu 22.04 + ROS 2 Humble 容器、Gazebo 比赛世界、Nav2、MoveIt 执行节点、本地练习模型服务和浏览器观察台。此脚本当前属于开发练习入口，会运行本地出题器和本地 Qwen；**没有接入官方模型前，不得把它当正式比赛启动方式**。观察台地址：<http://127.0.0.1:8765>。若浏览器没有自动打开，在同一台运行仿真的电脑上手动访问此地址。
+“启动”只是打开仿真和页面，不自动开始计时。**请通过页面或 `随机重置.sh` 重置，不使用 Gazebo 的 Reset Simulation/Reset Time 按钮准备新一轮。** Gazebo 关闭后要重新开完整程序，也运行 `./启动.sh`。
 
-### 官方模型适配模式
+## 2. 拿到压缩包以后
+
+压缩包文件名：`机器人比赛个人版.tar.gz`。把压缩包复制到目标 Linux 的下载目录，然后执行：
 
 ```bash
-# 模式切换前先 ./stop.sh
-YZBOT_TASK_MODE=official ./competition-start.sh
+tar -xzf "$HOME/下载/机器人比赛个人版.tar.gz" -C "$HOME"
+cd "$HOME/机器人比赛个人版"
+./启动.sh
 ```
 
-此入口启动仿真和观察台，不启动本地 Qwen，不自动生成练习题。默认适配器是明确报错的待实现模板；未接入官方资料前不能执行正式任务。模型接入和题目提交见第 5 节。
-
-### 常规仿真模式
-
-在项目目录运行：
+若系统下载目录叫 `Downloads`，第一行改成：
 
 ```bash
-./start.sh
+tar -xzf "$HOME/Downloads/机器人比赛个人版.tar.gz" -C "$HOME"
 ```
 
-该模式启动常规 Gazebo 世界、MoveIt RViz 与 Nav2 RViz，不启动比赛观察台和本地 Qwen。
+如果解压后的文件夹已经位于其他位置，进入那个文件夹运行 `./启动.sh` 即可。**程序从脚本所在位置定位文件，不要求固定账户名。** 复制到另一位置、切换原生/容器方式后，启动器会重新构建包含绝对路径的编译产物；不要把旧的 `build/install` 当作跨目录可执行包。
 
-### 桌面快捷方式
+完整工程位于 U 盘的 `~/桌面/机器人比赛个人版`。启动脚本、源码、地图、贴图、出题程序、可视化、离线环境镜像和说明都集中在这个文件夹。启动器会先检测系统：U 盘 Ubuntu 22.04 已有 ROS Humble 时直接原生启动；其他 Ubuntu 若没有 Humble、但已有 Docker，则使用工程内的离线镜像。进入该目录执行 `./启动.sh` 即可，不会自动下载软件或镜像。
 
-构建完成后可执行 `./install-desktop-shortcut.sh`，在当前用户桌面创建普通 Gazebo 仿真和比赛观察台快捷方式。比赛快捷方式默认是开发练习，需要另配测试模型；官方模式按终端环境变量启动。
+挂载 U 盘后在当前 Linux 测试，也可在该目录直接运行 `./启动.sh`；私有容器数据、编译结果和日志都留在项目文件夹。不要把容器数据目录移出项目。桌面启动入口会运行本机的 `~/机器人比赛个人版` 副本。
 
-### 关闭和重启
+## 3. 启动器如何选择环境
+
+- **自动启动**：本机已有 `/opt/ros/humble/setup.bash` 时优先使用原生 ROS Humble；没有 Humble 时，若 Docker/containerd 已安装则使用工程内镜像。U 盘自带 Ubuntu 22.04、ROS Humble、Gazebo 11、Nav2、MoveIt 和项目源码，因此 U 盘系统不需要 Docker，也不需要联网下载。
+- **显式切换**：`./启动.sh --native` 强制原生 Humble；`./启动.sh --container` 强制容器（需要系统已有 Docker/containerd）。切换时启动器会先停止本项目旧实例，避免端口、ROS 节点和相机数据混跑。
+
+Ubuntu24.04 宿主机需要 `python3`、`curl`、`docker`、`dockerd`、`containerd`、`sudo`、X11 图形桌面。当前电脑已有这些程序。全新主机若缺少 Docker 引擎，需要先自行安装对应系统的软件包；压缩包提供 ROS 仿真镜像，不包含 Docker 引擎安装器。
+
+容器方式需要系统提供 Python3、curl、Docker/containerd、sudo 和图形桌面；项目镜像和私有 Docker 数据由工程目录提供/管理。不会自动改宿主机 ROS 配置。U 盘原生方式使用其已有的 Humble、Gazebo 11、gazebo_ros、MoveIt、Nav2、slam_toolbox、ros2_control、colcon、CMake、编译器及 Python 依赖；启动不执行 apt，也不联网下载。原生模式按系统可用情况选择 CycloneDDS 或 Fast DDS。为兼容 Humble 对中文目录的限制，入口会自动在 `/tmp` 建立临时英文路径链接；该链接不保存工程文件，重启后自动重建，编译产物仍在本文件夹内。私有 ROS_DOMAIN_ID 默认91，避免和另一套仿真混在一起。
+
+原生系统要手动切换时：
 
 ```bash
-./stop.sh
-./competition-start.sh
+./启动.sh --container
+# 已安装 Humble 时才可使用：
+./启动.sh --native
 ```
 
-第一条关闭仿真容器、项目专用的 Docker 后台进程和本地练习模型；第二条重新启动比赛练习。`stop.sh` 不删除工程和日志。启动需要当前用户有图形桌面访问权限及启动 Docker/containerd 所需的管理员权限。
+容器镜像只包含运行与编译依赖，机器人源码位于 `ros_ws/`，每次用本目录源码构建；不是把旧代码藏在镜像里运行。镜像文件为 `runtime/ros-humble-gazebo.tar.gz`。
 
-## 2. 开始一轮练习
+运行生成的 `.runtime/`、`logs/`、`ros_ws/build`、`ros_ws/install` 和插件构建目录都在本文件夹里。停止只处理本目录的进程与私有 Docker 守护进程，不停止系统 Docker 或其他工程。删除本目录前先运行 `./停止.sh`；运行生成的 Docker 数据归 root 所有，文件管理器可能要求管理员权限。
 
-1. 等待 Gazebo 场景和观察台加载完成；状态显示“等待开始随机任务”。
-2. 点击“多隔间随机重置”。它会复位机器人、打开夹爪，并把红蓝各 5 个方块混合散布到地图的七个可达分区，包含挡板后方区域。各颜色没有固定取货点。
-3. 等状态显示“方块已随机摆放，场景已重置，可开始新一轮”。随机种子和每个方块坐标记录在 `logs/random-layout.json`。
-4. 点击“开始随机任务”。当前练习版由本地题目生成器出题，并调用本地测试模型解析，再由程序校验结果后执行。计时上限为 300 秒。正式比赛模型由组委会/平台提供，正式版必须按官方接口接入该模型，不能把本地 Qwen 当作比赛模型。
-5. 观察状态、规划路径、前置识别画面、两路固定机位和任务事件。每件物品的抓取抬升和放置落点会记录在状态及日志中。
+## 4. 本地模型来自哪里
 
-正在执行时，“停止作业”会取消当前任务。重新开始前先点击“随机重置”。正式比赛开始前应关闭练习题生成和本地模型调用，接入官方题目与模型服务。
+当前电脑复用此前已有的：
 
-为对比调试，可用 `POST /api/reset?seed=20261018` 复现布局；同一布局种子也对应相同练习题。普通按钮每次生成新种子。当前场景采样范围为 `x∈[-7,6.5] m、y∈[-5.5,6] m`，地图分区由可通行路径自动划分；摆放点要求离障碍足够远、有可行抓取接近位姿，物体间距大于 0.65 m。正式场景变更后，应更新地图、搜索范围和官方允许的摆放规则。
-
-## 3. 相机与机位
-
-当前仿真有三路不同用途的画面：
-
-| 画面 | ROS 2 图像话题 | 用途 |
-|---|---|---|
-| 机器人前置相机 | `/camera/image_raw` | HSV 颜色识别和抓取定位；安装在机器人上，会随车移动 |
-| 高位固定全景 | `/fixed_overview/image_raw` | 从场地上方观察整个作业区 |
-| 斜侧固定全景 | `/fixed_oblique/image_raw` | 从场地内侧观察底盘和机械臂动作 |
-
-两路固定画面以 640×360、5 FPS 发布，可在观察台“固定机位画面”区域查看。比赛规则的线上双机位规定为：机位一拍摄比赛现场，机位二录制电脑控制系统界面。这里新增的两路 Gazebo 固定视角用于仿真观察；正式参赛时仍应按组委会要求布置现场相机和电脑录屏。
-
-## 4. 工作原理
-
-```mermaid
-flowchart LR
-  Q[练习题生成 / 官方题目接口] --> L[模型适配层：比赛用官方模型；本地 Qwen 仅供开发测试]
-  L --> V[题目约束校验与算术核验]
-  V --> S[地图搜索与已知目标代价规划]
-  S --> N[Nav2 导航与路径跟踪]
-  C[前置相机图像] --> P[HSV 颜色检测与地面投影]
-  P --> T[多帧目标记忆]
-  T --> S
-  P --> M[MoveIt IK、碰撞检查与轨迹规划]
-  N --> M
-  M --> G[Gazebo 夹持、抬升、搬运和释放]
-  G --> R[Gazebo 实体落点核验]
-  N --> D[ROS 2 状态、路径与事件]
-  P --> D
-  M --> D
-  R --> D
-  D --> U[浏览器观察台]
+```text
+~/yzbot_ros2_run/competition/llm/llama-server
+~/yzbot_ros2_run/competition/llm/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
 ```
 
-- **Gazebo** 提供原 yzbot 底盘、六轴机械臂、传感器、工作区和移动障碍的物理仿真。比赛世界中保留的是提供工程里的机器人外形和结构。
-- **前置相机**输出真实 Gazebo 相机图像。颜色识别和目标坐标由图像、相机内参和 TF 计算；Gazebo 物体坐标主要用于确认识别对应的实体、检查抓取距离和核验最终落点。
-- **Nav2**规划底盘从取货区到放置区的路径，并控制差速底盘。移动障碍按预设路线巡逻；规划地图对巡逻路线加入代价，引导机器人绕行。
-- **MoveIt**根据抓取/放置目标计算机械臂逆解，执行碰撞检查、轨迹规划和关节控制。
-- **夹爪仿真**通过 Gazebo LinkAttacher 在接近物体后建立固定关节，搬运到目标区后释放，再读取实际落点核验。这是仿真附着模型，不代表真实夹爪的摩擦抓取性能。
-- **模型职责**：图像识别由机器人前置相机与颜色识别程序完成，语言模型只处理题意/任务结构。当前源代码里的本地题目生成器和 Qwen 调用用于开发、调试和本机练习；正式比赛题目、模型文件/服务和调用协议以组委会提供内容为准。练习模式会校验题目约束与执行计划，未通过校验的答案不会执行。
-- **定位边界**：比赛练习模式用 Gazebo 世界真值里程计和静态 `map→odom` 对齐，不能据此宣称已经完成真实 SLAM 验收。普通 `start.sh` 模式保留 AMCL 流程。
+此前检查过的 U 盘系统已有：
 
-### 分散目标的搜索与搬运策略
+```text
+~/llama.cpp/build/bin/llama-server
+~/llama.cpp/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+```
 
-机器人边移动边用前置相机识别目标，将相同颜色、位置一致的连续观测融合成目标记忆。搜索和目标选择模块不读取随机布局文件或 Gazebo 物体真值；Gazebo 实体名称在抵近、相机复核后才用于附着与接触核验。固定观察相机只用于观察台，不参与找货。已搬运物体的颜色在运输期间会从发现流程中过滤，机械臂升降和释放期间暂停记录，避免把高于地面的货物误投影成新的地面目标。图像按自身时间戳匹配 TF，并使用短帧缓存等待对应变换。
+启动器检查 8081 端口已有测试模型服务，或依次寻找 `~/llama.cpp`、本机旧项目测试模型目录和个人工程 `models/`。找不到时会明确报错，不伪造模型结果。权重是 Qwen2.5-Coder-0.5B-Instruct 的 GGUF 量化文件，只是方便本地联调的小模型，不代表官方比赛提供的模型。
 
-没有足够目标时，在可达地图中选择观察点，以“新增可见采样区域 /（移动时间 + 环视时间 + 预期送达代价）”评分。墙会阻断可见性，距离采用膨胀地图上的八邻域 Dijkstra 代价，包含狭窄通道和巡逻车区域惩罚。观察点到达后只转向尚未看过的方向；相机一旦确认所需颜色，就结束搜索动作。行驶中也会记住之后需要的另一种颜色。
-
-发现目标后，枚举每个物体的 16 个接近方向，检查停靠、抵近和转动空间；先到约 0.70 m 观察位置重新识别，再靠近到约 0.20 m 的抓取位置。用动态规划选择当前已发现目标的组合与执行次序，保持题目指定的颜色顺序和数量，并计入从当前位置到取货点、到放置区、转向和抓放的代价。单夹爪每次只搬一件；每次放置后根据新观测重新规划。
-
-“最优”只针对已发现目标、当前地图和估计代价模型；未知目标位置、动态障碍等待和识别误差使实际全局最快无法预先保证。这里的改进是每轮在线发现、记忆和重规划，不改变语言模型权重。观察台的搜索覆盖率是地图采样点的可见覆盖估计，不等于所有地面都已完成识别。
-
-## 5. 正式比赛模型与本地 Qwen 的区别
-
-**正式比赛使用组委会/比赛平台提供的模型；本地 Qwen 只用于个人电脑上的开发测试。** 本地 Qwen 不作为正式比赛的模型提交、比赛推理服务或官方模型替代品。收到官方模型文件、SDK、服务地址或话题接口后，应依据官方说明接入，不能根据本机测试接口猜测官方协议。
-
-### 本地开发服务（可选，不随 GitHub 工程分发）
-
-本机曾使用 `qwen2.5-coder-0.5b-instruct-q4_k_m.gguf`，由用户提供的 yzbot 工程复制而来，原工程 `tools_demo/readme.txt` 列有 ModelScope 下载链接，作为来源线索保留；本机文件的实际下载来源未核验。该本机文件 SHA-256 为 `1d9614638d18024d0fbb36575a15f1302a3adf044df10345688ec4f6e1c4ff32`。权重、`llama-server`、共享库及本地推理运行目录均不上传。接收源码的人不需要使用相同 Qwen，正式模式与该服务独立。
-
-如需复现本地练习，另行准备经过许可的 llama.cpp 兼容测试服务，需支持 `/health`、`/v1/chat/completions` 与 `response_format` 中的 JSON schema 约束，然后执行：
+其他位置可显式设置：
 
 ```bash
-YZBOT_TASK_MODE=practice \
-YZBOT_PRACTICE_LLM_URL=http://127.0.0.1:8081 ./competition-start.sh
+export YZBOT_LLAMA_SERVER="/你的目录/llama-server"
+export YZBOT_QWEN_MODEL="/你的目录/模型.gguf"
+./启动.sh
 ```
 
-如果本机已有 `competition/llm/` 的对应模型及 `llama-server`，默认练习入口可启动它们。源码接收者未配置服务时，练习入口会报错提示，不会下载或伪造模型。练习题的数量/顺序校验会使用生成器答案，只是本地调试机制；官方路径不使用该生成器或答案。
+已有兼容测试服务时：
 
-### 给后续 AI/开发者的官方模型接入步骤
+```bash
+YZBOT_PRACTICE_LLM_URL=http://127.0.0.1:8081 ./启动.sh
+```
 
-1. 先向组委会取得官方模型包、SDK/API 文档、版本、模型运行依赖、题目来源和 ROS 2 话题/服务定义。本项目不假设官方采用 OpenAI 兼容协议。
-2. 实现 `ros_ws/official_model_adapter.py` 中的 `solve_task(*, question, context, config)`。函数调用官方模型，完成解析及与原题的语义核验，再返回下列**项目内部控制结构**：
+当前适配器会将原题和可审计的需求/算术工具结果提交给模型，校验模型输出；不一致就停止，不把工具答案偷偷当成模型输出。算术工具针对当前出题程序的容器需求题型，不保证支持任意题目。
+
+## 5. 官方模型接入口
+
+主要文件：
+
+- `ros_ws/official_model_adapter.py`：由接手者按官方 SDK/协议实现 `solve_task(*, question, context, config)`。
+- `ros_ws/model_adapter.py`：隔离调用、超时和输出格式校验。
+- `ros_ws/qwen_exam_adapter.py`：仅本地测试用的实现范例。
+
+适配器返回归一化结果，例如：
 
 ```json
-{"red":2,"blue":3,"first":"red","red_zone":"B","blue_zone":"C"}
+{"red":2,"blue":3,"red_zone":"C","blue_zone":"A","first":"red"}
 ```
 
-这不是官方 API 格式。`ros_ws/model_adapter.py` 检查字段及范围：红蓝数量为整数、各 0..5、总数 5、顺序为 red/blue、区域 A/B/C。其他题型、物体或总数需要扩展感知、结构校验和执行器。结构校验不能替代官方适配器对题目答案的语义核验。
+这只是工程内部格式，不是官方接口协议。按官方资料实现推理、题意与规则校验，不能照抄示例作为答案。
 
-3. 可用 `YZBOT_OFFICIAL_ADAPTER=your_module:your_function` 指定其他模块（放在 `ros_ws/` 中）；可选 `YZBOT_OFFICIAL_CONFIG=/home/ros/dev_ws/official-config.json` 从**容器内路径**加载 JSON 配置并传入 `config`。参考根目录 `model-config.example.env`。配置、鉴权密钥和官方模型资产不提交 Git。调用层默认等待 45 秒，可用 `YZBOT_OFFICIAL_TIMEOUT` 设置为大于 0 且不超过 240 秒；超时后本轮停止，后台推理线程不再驱动任务。适配器只能做推理，不得发送机器人动作，并必须设置 SDK/网络调用的有限超时和有限重试来释放其资源；输出无效或调用失败时抛出异常停止，不返回默认计划。新增依赖写入 Dockerfile，模型资产按官方要求单独挂载。
-4. 以 `YZBOT_TASK_MODE=official ./competition-start.sh` 启动。由官方题目桥接程序向本地入口提交题目：
+保留用户提供的出题程序，仅更换解题模型：
 
 ```bash
-curl --noproxy '*' -X POST http://127.0.0.1:8765/api/task \
-  -H 'Content-Type: application/json' \
-  -d '{"question":"替换成官方完整原题","context":{"round_id":"example"}}'
-# 也可点观察台的“执行已接收题目”
-curl --noproxy '*' -X POST http://127.0.0.1:8765/api/start
+./停止.sh
+YZBOT_OFFICIAL_ADAPTER=official_model_adapter:solve_task ./启动.sh
 ```
 
-`/api/task` 是本项目的本机桥接口，**不是官方协议**。官方 ROS 接口需按文档另外映射。运行时不能替换题目；没有收到题目时拒绝开始；默认模板未实现时明确停止，且不调用 Qwen。适配调用和 SDK 在 ROS 容器内运行。当前入口不自动启动外部官方模型服务，服务生命周期按官方部署要求另行配置。
+官方平台直接提供题目时，使用 `YZBOT_TASK_MODE=official`。题目 JSON 通过本地 `/api/task` 接收；具体字段与示例在 `ros_ws/model_adapter.py` 和控制器 `set_official_task` 中，需接入方按平台实际协议适配。配置路径、密钥和模型资源单独提供，不写入浏览器或源码。
 
-5. 验收官方样例与实际 SDK/服务，记录模型版本、输入输出和结果，再进行完整比赛演练。当前交付已验证内部接口的字段校验、错误停止和自定义模块加载，**未验证官方模型兼容性或正式比赛成绩**，因为官方 SDK/模型/协议尚未提供。
+`competition/platform/TMSCQtest_x86_x64.bin` 是用户给的真实出题程序。考试模式传入参数 `11470507`；练习模式不带该参数。二进制本身只输出数学题，**不输出映射规则与先搬颜色**，这两项要从裁判要求或正式平台取得。工程的三组映射规则属于可配置模板，须核对官方要求。
 
-## 6. 部署结构
+## 6. 程序原理与目录
 
-- **主机要求**：Linux x86-64、有可用图形桌面与 X11/XWayland、Docker/containerd；启动脚本需要有权限启动项目专用 Docker/containerd。主机无需预装 ROS 2，ROS 环境在容器内。
-- **运行容器**：Ubuntu 22.04、ROS 2 Humble、Gazebo Classic 11、MoveIt 2、Nav2、CycloneDDS。仿真容器名为 `yzbot-sim`，ROS 域 ID 为 `88`。
-- **项目目录**：解压后的项目根目录就是启动脚本计算出的工作目录。`ros_ws/`、`competition/`、`logs/`、`docker-data/`、`containerd-root/`、`runtime-home/` 都相对放在该目录中。
-- **源码**：`ros_ws/src/yzbot/` 为本项目运行副本。启动容器时映射为容器内 `/home/ros/dev_ws`；容器内该固定路径供 ROS 包和 Gazebo 插件解析，与主机用户名和目录无关。
-- **本地开发模型**：本机可选的 `competition/llm/` 仅供练习，不随 GitHub 工程分发。官方模型通过独立适配器接入。
-- **启动脚本**：`start.sh`（普通仿真）、`competition-start.sh`（按环境变量选择练习/官方适配模式）、`stop.sh`（关闭运行环境）。脚本根据自身位置找项目目录，不要求安装在特定用户目录。
-- **观察台**：`ros_ws/competition_node.py` 和 `ros_ws/competition.html`；世界文件为 `ros_ws/src/yzbot/mybot_description/worlds/competition.world`。
-
-### 首次部署或重新构建
-
-主机需安装 Docker/containerd，并有活动图形桌面。Ubuntu 主机缺少这些命令时，可先安装：
-
-```bash
-sudo apt update
-sudo apt install docker.io containerd runc
+```text
+机器人比赛个人版/
+├── 启动.sh / 停止.sh / 构建.sh
+├── 开始考试.sh / 随机重置.sh / 第一人称.sh
+├── README.md
+├── launcher/             本机/容器选择、模型与私有运行环境管理
+├── native/               Humble 编译、ROS启动、完整就绪检查
+├── runtime/              可离线导入的 Humble/Gazebo 镜像
+├── ros_ws/
+│   ├── competition.html  原本地可视化，单屏同时显示各路画面
+│   ├── competition_node.py  ROS控制器与本地HTTP接口
+│   ├── mission_strategy.py  隔间搜索、目标记忆与搬运计划
+│   ├── scene_config.json    固定放置区、障碍车轨迹与参数
+│   ├── exam_bridge.py / question_math.py / 模型适配器
+│   └── src/              完整yzbot模型、地图、贴图和ROS包源码
+├── competition/platform/ 用户提供的出题程序
+└── visualization/        用户原JSON与兼容绑定版本，默认页面无需导入
 ```
 
-启动脚本以非交互方式启动项目专用后台，因此当前用户需有相应管理员授权。推荐在**项目根目录**运行 `./build.sh`：它先请求本机 sudo 授权、初始化专用后台、构建缺失镜像，然后编译工作区及插件。脚本会复用已有镜像；更改 Dockerfile 后需手动重新构建镜像。日常启动前如需 sudo 授权，执行 `sudo -v`；无需修改全局 sudo 配置。以下为等价的分步命令（先执行 `sudo -v; ./start.sh --daemon-only`）：
+流程是：读题并调用配置模型 → 校验数量、颜色和区域 → 根据可通行地图搜索隔间 → 第一人称相机检测并记住目标 → 比较已知目标的通行与搬运代价 → 抵近复核 → MoveIt 抓取与实际接触核验 → 单物体运送 → 指定区域释放与落点核验。
 
-```bash
-PROJECT_DIR="$(pwd)"
-docker -H "unix://$PROJECT_DIR/docker.sock" build \
-  -t yzbot-humble:local \
-  -f "$PROJECT_DIR/docker-build/Dockerfile" "$PROJECT_DIR/docker-build"
-```
+目标搜索使用相机发现的记忆；Gazebo 物体实体名称只在图像引导抵近后用于模拟夹持和落点核验。观察页面可选择显示场景核验真值，默认关闭，不把这些位置提供给搜索策略。导航融合已有地图先验和真实在线 SLAM；仿真里程计仍属于理想化仿真输入，不等于实机里程计验收。
 
-再用临时容器构建 ROS 工作区和巡逻插件：
+两个动态障碍车保留原白车模型，立牌使用用户给的图片，端点间距2.4米。前置相机保留升高后的观察位置，已增加与底盘相连的固定支架。地图原隔板保持不变，各放置区之间利用既有隔板分隔。
 
-```bash
-PROJECT_DIR="$(pwd)"
-docker -H "unix://$PROJECT_DIR/docker.sock" run --rm --network host --ipc host \
-  --user "$(id -u):$(id -g)" -e HOME=/home/ros -e ROS_DOMAIN_ID=88 \
-  -v "$PROJECT_DIR/runtime-home:/home/ros" \
-  -v "$PROJECT_DIR/ros_ws:/home/ros/dev_ws" -w /home/ros/dev_ws \
-  yzbot-humble:local bash -lc 'source /opt/ros/humble/setup.bash && \
-    colcon build --symlink-install \
-      --packages-select linkattacher_msgs ros2_linkattacher mybot_description mybot bot_navigation \
-      --cmake-args -DBUILD_TESTING=OFF && \
-    cmake -S src/yzbot/Move_Obs -B src/yzbot/Move_Obs/build && \
-    cmake --build src/yzbot/Move_Obs/build -j2'
-```
+## 7. 故障与验证边界
 
-巡逻插件在场景文件中使用容器内固定路径 `/home/ros/dev_ws/src/yzbot/Move_Obs/build/libcompetition_patrol.so`，因此需要在该工作区路径下构建。完成构建后，接好模型再选择练习或官方适配模式启动。仅观察普通仿真可运行 `./start.sh`，无需模型。日常启动不需要重复构建。
+- **相机只显示一帧后冻结**：日志显示旧版 Gazebo 启动进程已退出；旧启动把图形窗口和物理服务器放在同一个 `gazebo` 进程中。现已拆成独立 `gzserver` 与 `gzclient`。我在考试运行中实际关闭过 Gazebo 窗口：物理服务器继续运行，相机健康状态为真、帧龄不超过 0.1 秒；重新打开窗口后任务继续。
+- **开始考试后立即失败**：出题程序会随机生成不同计量单位。本次失败句子是“小圆要3盒牛奶”，旧解析器未支持“盒”。现已补充常见量词，连续解析 50 道真实随机题通过；随后实际考试中 Qwen 解出 x=2、y=3，映射到红2/蓝3、C/A区并开始执行。
+- **Ubuntu 24.04 上启动容器失败**：项目路径中的 Unix socket 与 Docker exec-root 太长。现已将 socket/exec-root 放在按项目隔离的短 `/tmp` 路径，私有 Docker 数据仍放在本项目 `.runtime`；Docker 使用 `overlay2`。已在 U 盘项目自身数据目录内重导镜像、构建五个 ROS 包并启动验证。
+- **启动与检查**：运行 `./启动.sh`（自动检测原生 Humble 或已有 Docker）；页面为 `http://127.0.0.1:8765/`。启动健康检查会等待 `/camera/image_raw`、地图、TF 和控制器全部收到新数据。前视相机约 10 Hz；图像接口为 `/api/image/raw`、`/api/image`，两个固定机位为 `/api/camera/overview`、`/api/camera/oblique`。相机检查失败时不要点击开始，查看 `logs/startup-error.txt` 与相机、Gazebo 日志。
+- **页面旧布局**：按 F5；正常桌面建议最大化浏览器。四路相机与地图应同时显示。
+- **开始按钮不可用**：当前任务运行、正在重置、相机/时钟/地图未更新或 TF 未连接时会禁用；先查看右上角状态和终端错误。
+- **程序已经停止/仿真窗口误关**：再执行 `./启动.sh`，会检查并恢复本工程未就绪的旧进程。
+- **换模型或切换环境**：先 `./停止.sh`，再带所需环境变量启动。
+- **重新编译**：`./构建.sh`；通常启动器会自动识别源码变化。
 
-## 7. 后续 AI 接手的源码位置与改动边界
+本轮从 U 盘项目目录启动隔离的 Humble 容器；代码、编译产物和容器数据均在 U 盘项目目录，Qwen 权重仍从 U 盘的 `~/llama.cpp` 读取。图像话题约 10 Hz，考试期间相机持续健康；关闭 Gazebo GUI 后物理服务器与相机仍运行。
 
-| 文件/位置（相对项目根目录） | 内容 |
-|---|---|
-| `ros_ws/competition_node.py`：`llm_task()` / `practice_task()` | 按模式分流；官方输入与练习生成器隔离 |
-| `ros_ws/official_model_adapter.py` | 官方 SDK/模型调用实现入口，默认明确报错待实现 |
-| `ros_ws/model_adapter.py` | 可配置适配器加载、内部任务结构校验 |
-| `ros_ws/competition_node.py`：`vision()` 与搬运流程 | 前置图像识别、坐标投影、导航/机械臂协调、抓取放置核验 |
-| `ros_ws/mission_strategy.py` | 地图通行代价、分区随机摆放、遮挡可见性、图像目标记忆、搜索评分和已知目标动态规划 |
-| `competition/test_distributed_strategy.py` | 挡板绕行、七区随机布局、目标记忆隔离和任务顺序检查 |
-| `ros_ws/competition.html` | 浏览器观察台、三路图像显示、进度和操作按钮 |
-| `ros_ws/src/yzbot/mybot_description/worlds/competition.world` | 比赛场景、货物、两辆巡逻车、两个固定观察相机 |
-| `ros_ws/src/yzbot/mybot_description/urdf/originbot_with_rgbd_gazebo_arm.xacro` | 移动机器人前置识别相机和机械臂组合模型 |
-| `ros_ws/src/yzbot/bot_navigation/param/competition_nav2.yaml` | 比赛练习用 Nav2 地图、底盘外廓和路径跟踪参数 |
-| `ros_ws/src/yzbot/mybot/config/six_arm_full.srdf` 与 MoveIt 配置 | 底盘、机械臂联合模型的规划组和碰撞配置 |
-| `ros_ws/src/yzbot/IFRA_LinkAttacher/ros2_LinkAttacher/src/gazebo_link_attacher.cpp` | 仿真抓取/释放插件 |
-| `ros_ws/src/yzbot/Move_Obs/competition_patrol.cc` | 白色移动底盘巡逻模型的平滑运动插件 |
+规则规定比赛限时 5 分钟，没有找到单独的小车速度上限。统一巡航上限设为 1.0 m/s，底盘加速度设为 2.0 m/s²，Nav2 仍以 20 Hz 控制，保留路径曲率限速、障碍碰撞预测，并在目标前 0.3 m 减速。自适应避障通过前置激光雷达估计距离变化和 TTC：安全/障碍远离时恢复 1.0 m/s，逼近时动态限到 0.6、0.3 m/s，极近距离或 TTC 很短时限到 0.1 m/s；局部代价地图标记障碍，Nav2 负责等待或重规划。策略与当前限速显示在可视化面板。
 
-已修复/设置的关键点：前置相机升高并朝向取货区；目标坐标由相机图像和 TF 投影；导航控制参考点放在驱动轮轴心附近；驱动轮几何间距和支撑球摩擦经过修正；夹爪末端姿态使用单位四元数 `(0,1,0,0)`；目标点附近由机器人末端做精对准；固定相机话题为 `/fixed_overview/image_raw` 和 `/fixed_oblique/image_raw`。调整这些配置后，先按部署章节重建相应包，再启动仿真核对。
+放置后先抬起并收回机械臂，再由 Nav2 以 0.20 m/s 倒退 0.30 m；受阻时尝试 0.15 m，避免小车/手臂扫到刚放下的货物。两辆移动障碍车横向离开原中央车道 4 m，巡回路程仍为 2.4 m；位置分别为 x=-3.35 m、x=5.65 m，轨迹均在静态地图可行驶区域。
 
-补充参数记录：前置相机由离地约 0.093 m 升至约 0.403 m，安装偏移 `y=0.16 m`、俯仰 `0.60 rad`、朝内偏转 `-0.35 rad`，输出 640×360、10 FPS；车体导航参考系为 `base_control`，驱动轮间距配置为 0.37 m；Nav2 使用 Regulated Pure Pursuit 和碰撞检测。比赛练习定位采用 Gazebo 世界里程计与静态 `map→odom` 对齐。两辆白色障碍车使用提供工程中的移动底盘模型和独立平滑巡逻插件。
+最新组合版随机考试（布局 seed 2638897587）在 300 秒时完成 4/5；相机健康、帧龄不超过 0.1 秒，4 次放置后倒车均成功。剩下 1 件未在时间内完成，单次测试不代表所有随机布局结果。旧版本曾在另一随机布局完成 5/5 用时 257.2 秒，但它没有本版的障碍车位移、放置后倒车和自适应速度控制，不能当成本版成绩。当前记录是在 Ubuntu 24.04 桌面启动 U 盘项目内 Ubuntu 22.04/Humble 容器，不代表从 U 盘系统启动后的独立启动验收。
 
-**正式对接时保留感知和运动控制链，只替换题目来源、模型调用、官方结果映射和 ROS 接口适配。** 当前比赛节点的 HTTP 和 ROS 话题是本地观察台接口，不代表组委会定义的接口。官方接口资料未随当前工程提供；拿到资料后，以官方 schema/topic/service 为准增加映射层，不能将下面的练习接口直接宣称为官方兼容。
+## 8. 本次 U 盘桌面部署记录（2026-10-19）
 
-## 8. ROS 2 与练习观察台接口
+完整目录：`/home/ros/桌面/机器人比赛个人版`。Ubuntu 24.04 主机通过项目附带镜像运行 Ubuntu 22.04/Humble 容器；本项目包含五个 ROS 包与两个动态插件的源码。中文路径构建问题已通过启动器临时短路径解决。编译产物、日志与运行数据位于本文件夹。项目压缩备份位于 `打包备份/机器人比赛个人版.tar.gz`，可用于重新解压。
 
-比赛后端发布 `/competition/task`、`/competition/status`、`/competition/detections`、`/competition/events`、`/competition/path` 和 `/llama_command`。图像话题见上方相机表。浏览器观察台只监听本机 `127.0.0.1:8765`，主要接口如下：
+本次在 Ubuntu24.04 桌面通过 U 盘项目自己的 Ubuntu22.04/Humble 容器运行；Docker 私有存储放在本项目 `.runtime`，容器镜像由项目内 `runtime/ros-humble-gazebo.tar.gz` 导入。验证了 gzserver/gzclient 分离、关闭 GUI 后物理和相机继续运行、前置相机约10Hz、两路固定机位与 SLAM 地图接口可用，启动健康检查通过。此前连续50次测试实际重复生成同一题型，不能作为模板全覆盖证据；本次新遇到“书箱借阅”题型，已修复并通过实际考试题解析、Qwen、算术校验和任务映射。更新后的动态速度策略在真实仿真中有 1.0/0.6/0.3 m/s 限速切换记录；放置后倒车4次成功；组合版 300 秒完成4/5。未完成的那1件和其他随机布局仍需继续测试。本次没有从 U 盘重新开机进入另一套 Ubuntu，因此只验证了 U 盘项目在当前 Linux 桌面的完整运行。Qwen 权重继续使用 U 盘 `~/llama.cpp`，不在工程压缩包内。
 
-| HTTP | 用途 |
-|---|---|
-| `GET /api/state` | 当前题目、进度、机器人和场景状态 |
-| `GET /api/image` | 机器人前置相机 JPEG |
-| `GET /api/camera/overview` | 高位固定机位 JPEG |
-| `GET /api/camera/oblique` | 斜侧固定机位 JPEG |
-| `GET /api/map` | 观察台地图底图 |
-| `POST /api/task` | 官方适配模式接收 `{question, context}`；本机桥接入口 |
-| `POST /api/start` | 开始 300 秒任务（来源由启动模式决定） |
-| `POST /api/reset?seed=整数`（seed 可省略） | 复位并随机摆放场景 |
-| `POST /api/stop` | 停止当前动作 |
 
-## 9. 已验证结果与交付边界
+## 9. U 盘相机与运动故障复测（2026-10-19）
 
-2026-10-18 的分散摆放测试：红蓝各 5 个物体散布在七个地图分区；任务取红 3、蓝 2，先蓝后红，红放 A、蓝放 C。机器人用前置图像搜索，没有把随机布局坐标作为搜索输入。
+这次出现“点考试后不动”的直接原因是出题器生成了“每个书箱……小文借阅……”题型，题目解析器的主体动词表没有“借阅”，任务在发给导航之前就报错，考试计时停在约 0.1 秒。现已加入“借阅、借了、借”等主体动词，真实出题器题目通过需求统计，Qwen 输出 x=4、y=1 并完成规则映射。
 
-| 版本 | 布局种子 | 实际抓取 / 放置 | 用时 | 限时 |
-|---|---|---|---|---|
-| 分散搜索首次跑通 | 20261018 | 5/5、5/5 | 296.5 秒 | 300 秒 |
-| 减少无效环视、搜索考虑送达代价 | 20261018 | 5/5、5/5 | 281.5 秒 | 300 秒 |
+此前原生 Humble 启动曾出现“前置相机没有新图像”。启动器现按系统已有环境自动选择：U 盘 Ubuntu Humble 使用原生启动，其他系统只有在已有 Docker 时才用内置镜像。两种路径都在相机、TF、地图和控制器收到新数据后才报告就绪。网页第一人称相机固定在小车 `camera_link` 上，会随小车运动；它显示机器人前置相机，不镜像操作者在 Gazebo 中拖动的观察视角。
 
-同一布局和题目下减少 15.0 秒。只验证了这一分散种子的两次完整运行，不能据此宣称多种子成功率、未知场景全局最优或正式比赛通过。抓取抬升事件和实际落点核验在 [分散场景验证记录](competition/distributed_debug_seed_20261018/report.md) 及同目录 JSON 中。
+实际随机考试复测（布局 seed `1604887570`）：相机在约 8.5 秒发现目标，约 23 秒抓取、约 39 秒放置。前视画面、识别画面、两路固定机位和 SLAM 地图接口均返回 HTTP 200；连续读取时 JPEG 帧持续变化，前置帧龄为 0–0.2 秒。图像时间戳配对 `camera_link` TF；前 8 个识别目标的位置误差不超过约 0.067 米。机器人实际移动并成功验证放置 3 件。该随机布局 300 秒内完成 3/5，期间一个搜索观察点不可达并重选，因此仍不能算整场通过。复测后已随机复位为就绪状态，可从网页开始下一轮。详细记录见 `verification/相机运动复测-20261019.json`。
 
-更早的简单取货布局记录为 245.6 秒、5/5；它的目标集中，不能用作七区搜索的成绩。见 [早期练习记录](competition/mock_exam_seed_2949820153/report.md)。
+## 10. U 盘原生系统启动与考试复测（2026-10-19）
 
-新增两路固定相机已检查图像发布，均约 5 Hz。官方适配模式已做“无题拒绝开始、提交题目、未配置适配器明确停止”检查，停止前未搬运物体；练习解析与运动控制路径保持独立。离线检查可运行：
+检查 U 盘自己的 Ubuntu 根文件系统后确认：Ubuntu 22.04.3、ROS Humble desktop、Gazebo 11、gazebo_ros、MoveIt、Nav2、slam_toolbox、ros2_control、colcon、CMake、G++ 和 Python 依赖已经安装；Docker 没有安装。比赛项目、Qwen 权重、TMSCQ 出题程序和离线 Humble 镜像都已在盘内。启动器默认策略已修复为“检测到 Humble 就原生启动；只有没有 Humble 且本机已有 Docker 时才使用离线镜像”。启动过程不下载、不运行 apt。
 
-```bash
-python3 -m unittest discover -s competition -p 'test_distributed_strategy.py' -v
-python3 -m unittest discover -s competition -p 'test_model_adapter.py' -v
-```
+本次用 U 盘自身的 Ubuntu 根文件系统和 ROS 软件包启动 Gazebo、Nav2、MoveIt、考试服务与 Qwen，原生构建和健康检查通过。三个摄像头接口 `/api/image`、`/api/camera/overview`、`/api/camera/oblique` 均返回连续变化的 JPEG 帧，帧龄为 0–0.2 秒。随机考试启动后，Qwen 解析题目得到红 3、蓝 2；前置相机定位并复核红块，机器人实际导航、抓取并把 3 件红块放入 A 区。该随机布局在 300 秒完成 3/5，剩余 2 件蓝块未搬运，属于未通过；不能把相机和启动链路通过说成整场比赛通过。详细过程见 `verification/U盘原生启动复测-20261019.json`。
 
-这是本地 Gazebo 练习成绩，不是官方比赛成绩。正式比赛必须对接平台提供的模型、官方出题与 ROS 接口；这些材料尚未包含在工程中。真实 SLAM、真实硬件抓取、不同随机布局的稳定性及按要求布置现场机位/电脑录屏仍需验收。按已提供的规则，省赛交付物包括**算法源码压缩包、技术文档和比赛视频**；本 README 可作为技术说明基础，首页的编号、团队和成员需自行填写。当前未制作比赛视频。
-
-## 10. 工程交付与清理
-
-GitHub 交付包含源码、地图、原机器人和世界资产、Gazebo 插件源码、构建与启停脚本、官方适配模板、检查脚本和少量验证记录。保留依赖源码原有许可证；来源说明见根目录 `THIRD_PARTY_NOTICES.md`。不包含 Qwen 权重、本地推理程序、官方模型、密钥、Docker 镜像/运行数据、编译产物和大批临时日志。接收者应按第 6 节重新构建。
-
-所有项目运行数据默认生成在工程目录内；先 `./stop.sh`，确认没有需要保留的结果后可删除整个工程目录。主机安装的 Docker/containerd/GitHub CLI 等系统软件由包管理器管理，不随删工程自动移除。专用 Docker/containerd 初始化需要 sudo，宿主图形显示依赖活动 X11/XWayland 会话；不同主机的图形授权和图像性能需当地验证。
+上述原生启动测试使用 U 盘上的 Ubuntu 文件系统与软件包，在当前图形桌面中运行；它验证了 U 盘环境内容与原生流程，但不是一次从 U 盘重新开机的独立硬件验收。用户从 U 盘 Ubuntu 桌面进入本目录后直接双击 `机器人比赛仿真.desktop`，或运行 `./启动.sh` 即可；浏览器地址为 `http://127.0.0.1:8765/`，第一人称画面为 `http://127.0.0.1:8765/fpv`。

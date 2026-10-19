@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-19",
+  "usb_project": "/home/ros/桌面/机器人比赛个人版",
+  "method": "Ubuntu24.04 host + project-private Ubuntu22.04/Humble container; Docker data on USB project; GUI via X11",
+  "ros_packages_passed": 5,
+  "dynamic_plugins_passed": 2,
+  "unicode_path_fixed": true,
+  "usb_graphical_boot_tested": false,
+  "host_full_runtime_previously_tested": true,
+  "weights_bundled": false,
+  "other_workspaces_overwritten": false,
+  "latest_run": "2026-10-19: bundled Humble container; parser fix; camera + movement retest",
+  "camera_health": "PASS during live exam; image_age 0.0-0.2s; front, overview, oblique streams returned changing JPEG frames",
+  "camera_rate_hz": 10.0,
+  "http_dashboard": 200,
+  "http_fpv": 200,
+  "http_raw_camera": 200,
+  "http_annotated_camera": 200,
+  "http_overview_camera": 200,
+  "http_oblique_camera": 200,
+  "healthy_state": true,
+  "full_usb_reboot_graphical_tested": false,
+  "front_camera_hz_observed": 10.0,
+  "camera_raw_http_status": 200,
+  "camera_annotated_http_status": 200,
+  "fixed_overview_http_status": 200,
+  "fixed_oblique_http_status": 200,
+  "slam_map_http_status": 200,
+  "latest_startup_health": "PASS (container; clock, camera, map, TF, Nav2, MoveIt)",
+  "exam_generator": "PASS (50 actual randomized questions parsed)",
+  "local_qwen_and_arithmetic_validation": "PASS (actual exam: x=2,y=3)",
+  "exam_task_mapping": "red=2 blue=3 red_zone=C blue_zone=A first=red",
+  "exam_motion_test": "PARTIAL (real borrowing question parsed; 3/5 items placed by 300s; all three camera views active; 3 verified drops; one unreachable observation point retried)",
+  "full_300_second_mission_in_this_check": true,
+  "known_fixes": [
+    "split gzserver/gzclient and verify physics/camera stay live when GUI closes",
+    "parse random demand units including 盒/袋/杯/箱",
+    "use short per-project /tmp Docker sockets and exec-root for long USB paths",
+    "use overlay2 for project-private Docker storage on USB",
+    "publish dynamic absolute speed limits to Nav2 from laser front-range closing/TTC with hysteresis",
+    "retreat 0.30 m after each verified drop, retry 0.15 m if blocked",
+    "move both dynamic patrol tracks 4 m from center lane while preserving 2.4 m travel"
+  ],
+  "mission_complete_within_300_seconds": false,
+  "mission_elapsed_seconds": 300.1,
+  "mission_items_picked": 3,
+  "mission_items_placed": 3,
+  "mission_layout_seed": 1604887570,
+  "mission_camera_age_max_seconds": 0.1,
+  "nav2_cruise_limit_mps": 1.0,
+  "gazebo_base_acceleration_mps2": 2.0,
+  "adaptive_speed_policy": "PASS exercised at 1.0, 0.6, 0.3 m/s; full cruise restored when clear or receding; close range/TTC caps configured at 0.1 m/s",
+  "post_drop_retreat": "PASS (4 drops; Nav2 backed up 0.30 m at 0.20 m/s each)",
+  "patrol_positions_moved_from_previous_x_m": 4.0,
+  "patrols": [
+    {
+      "model": "Move1",
+      "start": [
+        -3.35,
+        -1.55,
+        0.005
+      ],
+      "end": [
+        -3.35,
+        0.85,
+        0.005
+      ],
+      "travel_m": 2.4
+    },
+    {
+      "model": "Move2",
+      "start": [
+        5.65,
+        -0.75,
+        0.005
+      ],
+      "end": [
+        5.65,
+        1.65,
+        0.005
+      ],
+      "travel_m": 2.4
+    }
+  ],
+  "speed_rule": "No separate robot speed cap found in rules; match time limit is 5 minutes",
+  "question_parser_fix": "PASS (borrow/read subject verbs; actual generator question Qwen answer x=4,y=1 validated)",
+  "camera_stream_sync_test": "PASS (front camera images use image-stamp camera_link TF; first 8 observed target coordinates within 0.067m of randomized Gazebo target positions; all image endpoints HTTP 200 and changing)",
+  "startup_mode_default": "bundled Ubuntu22.04/Humble container; --native is opt-in",
+  "prior_native_startup_error": "前置相机没有新图像; native is no longer the default path",
+  "ready_scene_seed_after_retest": 631886950
+}

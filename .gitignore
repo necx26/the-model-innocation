@@ -20,6 +20,7 @@
 *.pt
 *.pth
 *.bin
+!/competition/platform/TMSCQtest_x86_x64.bin
 *llama-server*
 # Private adapter configuration / credentials
 .env
@@ -40,3 +41,9 @@ CMakeCache.txt
 # Optional recordings
 *.mp4
 *.mkv
+
+# Native USB generated state, optional GUI binaries and private test display token
+/vendor/
+/viewer-state/
+/.test-Xauthority
+/ros_ws/logs/

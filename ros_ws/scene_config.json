@@ -1,0 +1,54 @@
+{
+  "zones": {
+    "A": [
+      -5.5,
+      4.0
+    ],
+    "B": [
+      5.1,
+      4.5
+    ],
+    "C": [
+      2.8,
+      -4.0
+    ]
+  },
+  "patrols": [
+    {
+      "model": "Move1",
+      "start": [
+        -3.35,
+        -1.55,
+        0.005
+      ],
+      "end": [
+        -3.35,
+        0.85,
+        0.005
+      ],
+      "period": 28.0
+    },
+    {
+      "model": "Move2",
+      "start": [
+        5.65,
+        -0.75,
+        0.005
+      ],
+      "end": [
+        5.65,
+        1.65,
+        0.005
+      ],
+      "period": 26.0
+    }
+  ],
+  "exam": {
+    "question_mode": "competition",
+    "rule": 1,
+    "first": "red"
+  },
+  "time_limit_seconds": 300,
+  "cruise_speed_mps": 1.0,
+  "layout_sectors": 7
+}

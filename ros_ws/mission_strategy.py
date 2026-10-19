@@ -8,6 +8,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import yaml
+from scene_config import SCENE, ZONES, PATROLS, in_delivery_area
+CRUISE_SPEED = float(SCENE.get("cruise_speed_mps", .65))
 
 
 def wrap(a):
@@ -34,8 +36,9 @@ class MissionMap:
         self.walk &= walk > 0
         self.weight = 1. + .35 * np.exp(-np.maximum(self.clearance - .43, 0) / .25)
         # Same predictive patrol preference as Nav2; live obstacles remain Nav2's job.
-        for x, lo, hi in [(.5, -1.2, .2), (1.6, -.2, 1.)]:
-            risk = (np.abs(xs[None, :] - x) < .65) & (ys[:, None] > lo - .65) & (ys[:, None] < hi + .65)
+        for patrol in PATROLS:
+            a,b=patrol['start'],patrol['end']
+            risk = (xs[None,:]>min(a[0],b[0])-.65)&(xs[None,:]<max(a[0],b[0])+.65)&(ys[:,None]>min(a[1],b[1])-.65)&(ys[:,None]<max(a[1],b[1])+.65)
             self.weight[risk] += 1.5
         self._fields = {}
         self.search_points = []
@@ -44,7 +47,7 @@ class MissionMap:
             for c in range(3, len(xs) - 3, 6):
                 x, y = self.xy((r, c))
                 # Delivery area and initial platform are not cargo search areas.
-                excluded = (abs(x - 3.) < .85 and abs(y) < 1.7) or math.hypot(x, y) < .85
+                excluded = in_delivery_area((x,y), extra=.25) or math.hypot(x, y) < .85
                 if self.walk[r, c] and self.clearance[r, c] >= .63 and not excluded:
                     self.search_points.append((x, y))
         self.search_points = np.array(self.search_points, dtype=float)
@@ -154,8 +157,8 @@ class MissionMap:
             if gain == 0:
                 continue
             distance = self.distance(field, view['point'])
-            service_cost = .5 * self.distance(back, view['point']) / .65 if back is not None else 0.
-            score = gain / (5. + distance / .65 + service_cost + 4. * attempted.get(i, 0))
+            service_cost = .5 * self.distance(back, view['point']) / CRUISE_SPEED if back is not None else 0.
+            score = gain / (5. + distance / CRUISE_SPEED + service_cost + 4. * attempted.get(i, 0))
             if math.isfinite(distance) and (best is None or score > best[0]):
                 centre = np.mean(self.search_points[view['visible'][~seen[view['visible']]]], axis=0)
                 yaw = math.atan2(centre[1] - view['point'][1], centre[0] - view['point'][0])
@@ -178,19 +181,29 @@ class MissionMap:
             anchors.append(pool[int(np.argmax(np.where(np.isfinite(nearest), nearest, -1)))])
         anchors = anchors[:sectors]
         assignments = np.argmin([[self.distance(f, p) for p in pool] for f in fields], axis=0)
-        order = list(range(sectors)); rng.shuffle(order)
-        order += rng.sample(list(range(sectors)), 10 - sectors)
         colors = ['red'] * 5 + ['blue'] * 5; rng.shuffle(colors)
         layout = []
-        for i, (sector, color) in enumerate(zip(order, colors)):
-            choices = [tuple(points[k]) for k in np.flatnonzero(assignments == sector)
-                       if all(math.dist(points[k], (o['x'], o['y'])) > .65 for o in layout)]
-            if not choices:
-                raise ValueError('分区内没有足够的可抓取摆放空间')
-            p = rng.choice(choices)
-            number = 1 + sum(o['color'] == color for o in layout)
-            layout.append({'model': f'{color}_cube_{number}', 'color': color, 'sector': int(sector),
-                           'x': float(p[0]), 'y': float(p[1]), 'z': .025})
+        for trial in range(64):
+            order=list(range(sectors));rng.shuffle(order)
+            layout=[];repeated=set()
+            def choices_for(sector):
+                return [tuple(points[k]) for k in np.flatnonzero(assignments==sector)
+                        if all(math.dist(points[k],(o['x'],o['y']))>.65 for o in layout)]
+            for i,color in enumerate(colors):
+                if i<sectors:
+                    sector=order[i];choices=choices_for(sector)
+                else:
+                    options=[(k,choices_for(k)) for k in range(sectors) if k not in repeated]
+                    options=[(k,ps) for k,ps in options if ps]
+                    if not options:break
+                    sector,choices=rng.choice(options);repeated.add(sector)
+                if not choices:break
+                p=rng.choice(choices)
+                number=1+sum(o['color']==color for o in layout)
+                layout.append({'model':f'{color}_cube_{number}','color':color,'sector':int(sector),
+                               'x':float(p[0]),'y':float(p[1]),'z':.025})
+            if len(layout)==10:break
+        else:raise ValueError('七个分区内没有足够的可抓取摆放空间，请检查地图/放置区')
         return {'seed': seed, 'layout': layout, 'sector_anchors': anchors, 'bounds': self.bounds,
                 'minimum_spacing_m': .65, 'source': 'map_safe_geodesic_partitions', 'sector_count': sectors}
 
@@ -269,7 +282,7 @@ def plan_deliveries(grid, current, candidates, remaining, zones, start_number=0)
             for a in grid.approaches(t):
                 cost = grid.distance(df, a['view']) + grid.distance(ef, a['grasp']) + .5
                 turn = abs(wrap(a['grasp'][2] - sources[slot][2])) + abs(wrap(a['grasp'][2]))
-                options.append((cost / .65 + turn / .9 + 17., a))
+                options.append((cost / CRUISE_SPEED + turn / .9 + 17., a))
             if options:
                 best = min(options, key=lambda v: v[0])
                 if math.isfinite(best[0]): costs[slot, i] = best

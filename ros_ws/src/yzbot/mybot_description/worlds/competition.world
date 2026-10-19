@@ -4018,7 +4018,7 @@
       <static>1</static>
     </model>
     <model name="red_cube_1">
-      <pose>-1.5 1 .025 0 0 0</pose>
+      <pose>5.3 -4.5 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4069,7 +4069,7 @@
       </link>
     </model>
     <model name="red_cube_2">
-      <pose>-1.63 1 .025 0 0 0</pose>
+      <pose>-1.9 -3.9 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4120,7 +4120,7 @@
       </link>
     </model>
     <model name="red_cube_3">
-      <pose>-1.76 1 .025 0 0 0</pose>
+      <pose>-1.3 -0.3 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4171,7 +4171,7 @@
       </link>
     </model>
     <model name="red_cube_4">
-      <pose>-1.8900000000000001 1 .025 0 0 0</pose>
+      <pose>5.9 2.7 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4222,7 +4222,7 @@
       </link>
     </model>
     <model name="red_cube_5">
-      <pose>-2.02 1 .025 0 0 0</pose>
+      <pose>2.9 -2.7 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4273,7 +4273,7 @@
       </link>
     </model>
     <model name="blue_cube_1">
-      <pose>-1.5 -1 .025 0 0 0</pose>
+      <pose>-6.7 4.5 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4324,7 +4324,7 @@
       </link>
     </model>
     <model name="blue_cube_2">
-      <pose>-1.63 -1 .025 0 0 0</pose>
+      <pose>5.9 1.5 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4375,7 +4375,7 @@
       </link>
     </model>
     <model name="blue_cube_3">
-      <pose>-1.76 -1 .025 0 0 0</pose>
+      <pose>-6.7 -2.1 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4426,7 +4426,7 @@
       </link>
     </model>
     <model name="blue_cube_4">
-      <pose>-1.8900000000000001 -1 .025 0 0 0</pose>
+      <pose>4.7 5.7 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4477,7 +4477,7 @@
       </link>
     </model>
     <model name="blue_cube_5">
-      <pose>-2.02 -1 .025 0 0 0</pose>
+      <pose>-6.1 5.7 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4529,7 +4529,7 @@
     </model>
     <model name="zone_a">
       <static>1</static>
-      <pose>3 1 0.01 0 -0 0</pose>
+      <pose>-5.5 4.0 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -4600,7 +4600,7 @@
     </model>
     <model name="zone_b">
       <static>1</static>
-      <pose>3 0 0.01 0 -0 0</pose>
+      <pose>5.1 4.5 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -4722,7 +4722,7 @@
     </model>
     <model name="zone_c">
       <static>1</static>
-      <pose>3 -1 0.01 0 -0 0</pose>
+      <pose>2.8 -4.0 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -4798,7 +4798,6 @@
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <!-- Fixed camera 1: high overview of the complete practice area. -->
     <model name="competition_camera_overview">
       <static>true</static>
       <pose>-.25 .25 13 0 1.5707963 0</pose>
@@ -4808,8 +4807,15 @@
           <update_rate>5</update_rate>
           <camera name="overview">
             <horizontal_fov>1.5708</horizontal_fov>
-            <image><width>640</width><height>360</height><format>R8G8B8</format></image>
-            <clip><near>0.05</near><far>30</far></clip>
+            <image>
+              <width>640</width>
+              <height>360</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.05</near>
+              <far>30</far>
+            </clip>
           </camera>
           <plugin name="overview_ros_camera" filename="libgazebo_ros_camera.so">
             <ros>
@@ -4822,7 +4828,6 @@
         </sensor>
       </link>
     </model>
-    <!-- Fixed camera 2: low oblique view showing chassis and arm motion. -->
     <model name="competition_camera_oblique">
       <static>true</static>
       <pose>0 -6.5 7.5 0 0.843 1.5707963</pose>
@@ -4832,8 +4837,15 @@
           <update_rate>5</update_rate>
           <camera name="oblique">
             <horizontal_fov>2.0</horizontal_fov>
-            <image><width>640</width><height>360</height><format>R8G8B8</format></image>
-            <clip><near>0.05</near><far>30</far></clip>
+            <image>
+              <width>640</width>
+              <height>360</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.05</near>
+              <far>30</far>
+            </clip>
           </camera>
           <plugin name="oblique_ros_camera" filename="libgazebo_ros_camera.so">
             <ros>
@@ -4853,7 +4865,7 @@
       <device>default</device>
     </audio>
     <wind />
-    <plugin name="competition_link_attacher" filename="/home/ros/dev_ws/install/ros2_linkattacher/lib/libgazebo_link_attacher.so" />
+    <plugin name="competition_link_attacher" filename="libgazebo_link_attacher.so" />
     <model name="Move1">
       <link name="base_footprint">
         <inertial>
@@ -5007,11 +5019,11 @@
           </geometry>
         </visual>
       </link>
-      <pose>0.5 -1.2 0.005 0 0 1.5708</pose>
-      <plugin name="competition_patrol" filename="/home/ros/dev_ws/src/yzbot/Move_Obs/build/libcompetition_patrol.so">
-        <start>0.5 -1.2 0.005</start>
-        <end>0.5 0.2 0.005</end>
-        <period>28</period>
+      <pose>-3.35 -1.55 0.005 0 0 1.57079632679</pose>
+      <plugin name="competition_patrol" filename="libcompetition_patrol.so">
+        <start>-3.35 -1.55 0.005</start>
+        <end>-3.35 0.85 0.005</end>
+        <period>28.0</period>
       </plugin>
       <static>true</static>
       <link name="laser_link">
@@ -5041,6 +5053,46 @@
         <parent>base_link</parent>
         <child>laser_link</child>
       </joint>
+      <link name="picture_placard">
+        <pose>0 0 0 0 0 0</pose>
+        <visual name="support">
+          <pose>0 0 .25 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>.008</radius>
+              <length>.22</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>.12 .12 .12 1</ambient>
+            <diffuse>.12 .12 .12 1</diffuse>
+          </material>
+        </visual>
+        <visual name="picture">
+          <pose>0 0 .49 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>.012 .26 .394</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://yzbot_signs/materials/scripts</uri>
+              <uri>model://yzbot_signs/materials/textures</uri>
+              <name>Yzbot/UserPlacard</name>
+            </script>
+          </material>
+          <cast_shadows>false</cast_shadows>
+        </visual>
+        <collision name="board">
+          <pose>0 0 .49 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>.012 .26 .394</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
     </model>
     <model name="Move2">
       <link name="base_footprint">
@@ -5195,11 +5247,11 @@
           </geometry>
         </visual>
       </link>
-      <pose>1.6 -0.2 0.005 0 0 1.5708</pose>
-      <plugin name="competition_patrol" filename="/home/ros/dev_ws/src/yzbot/Move_Obs/build/libcompetition_patrol.so">
-        <start>1.6 -0.2 0.005</start>
-        <end>1.6 1.0 0.005</end>
-        <period>26</period>
+      <pose>5.65 -0.75 0.005 0 0 1.57079632679</pose>
+      <plugin name="competition_patrol" filename="libcompetition_patrol.so">
+        <start>5.65 -0.75 0.005</start>
+        <end>5.65 1.65 0.005</end>
+        <period>26.0</period>
       </plugin>
       <static>true</static>
       <link name="laser_link">
@@ -5229,6 +5281,46 @@
         <parent>base_link</parent>
         <child>laser_link</child>
       </joint>
+      <link name="picture_placard">
+        <pose>0 0 0 0 0 0</pose>
+        <visual name="support">
+          <pose>0 0 .25 0 0 0</pose>
+          <geometry>
+            <cylinder>
+              <radius>.008</radius>
+              <length>.22</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>.12 .12 .12 1</ambient>
+            <diffuse>.12 .12 .12 1</diffuse>
+          </material>
+        </visual>
+        <visual name="picture">
+          <pose>0 0 .49 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>.012 .26 .394</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://yzbot_signs/materials/scripts</uri>
+              <uri>model://yzbot_signs/materials/textures</uri>
+              <name>Yzbot/UserPlacard</name>
+            </script>
+          </material>
+          <cast_shadows>false</cast_shadows>
+        </visual>
+        <collision name="board">
+          <pose>0 0 .49 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>.012 .26 .394</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
     </model>
   </world>
 </sdf>
