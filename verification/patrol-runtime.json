@@ -1,0 +1,35 @@
+{
+  "duration_seconds": 30.0,
+  "terrain_pose_error": 9.999999983634211e-07,
+  "records": {
+    "Move1": {
+      "samples": 599,
+      "min_margin": 0.6694028446965314,
+      "axis_min": [
+        -1.5,
+        -8.399999728082339
+      ],
+      "axis_max": [
+        -1.5,
+        -6.000000271917662
+      ],
+      "observed_travel_span": 2.399999456164677,
+      "passed": true
+    },
+    "Move2": {
+      "samples": 599,
+      "min_margin": 1.3023581442917853,
+      "axis_min": [
+        11.500000315360127,
+        -5.2
+      ],
+      "axis_max": [
+        13.899999684639873,
+        -5.2
+      ],
+      "observed_travel_span": 2.3999993692797457,
+      "passed": true
+    }
+  },
+  "passed": true
+}

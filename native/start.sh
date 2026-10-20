@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -eo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/environment.sh"
+python3 "$YZBOT_PROJECT/tools/check_patrols.py" >"$YZBOT_LOG/patrol-safety.json"
 [[ -f "$YZBOT_WS/install/local_setup.bash" ]] || { echo '先执行 ./native/build.sh' >&2;exit 1; }
 if current=$(curl --noproxy '*' -sf http://127.0.0.1:8765/api/state); then
-  if python3 -c 'import json,sys; a=json.load(sys.stdin); sys.exit(0 if a.get("healthy") and a.get("phase")!="重置失败" else 1)' <<< "$current"; then
+  if python3 -c 'import hashlib,json,os,pathlib,sys; a=json.load(sys.stdin); root=pathlib.Path(os.environ["YZBOT_PROJECT"]); hashes=a.get("runtime_source_files_sha256",{}); fresh=bool(hashes) and all((root/n).is_file() and hashlib.sha256((root/n).read_bytes()).hexdigest()==h for n,h in hashes.items()); sys.exit(0 if fresh and a.get("healthy") and a.get("phase")!="重置失败" else 1)' <<< "$current"; then
     echo '工程已运行且机器人就绪：http://127.0.0.1:8765'
     if [[ ${YZBOT_ENABLE_RVIZ:-1} == 1 ]]; then "$YZBOT_PROJECT/native/rviz.sh"; fi
     if [[ ${1:-} == --open ]]; then "$YZBOT_PROJECT/native/visualize.sh"; fi
     exit 0
   fi
-  echo '检测到未就绪的旧进程，先停止本工程再重新启动。'
+  echo '检测到源码更新或未就绪的旧进程，先停止本工程再重新启动。'
   "$YZBOT_PROJECT/native/stop.sh"
 fi
 if [[ "$YZBOT_OFFICIAL_ADAPTER" == qwen_exam_adapter:solve_task ]]; then "$YZBOT_PROJECT/native/start-model.sh"; fi

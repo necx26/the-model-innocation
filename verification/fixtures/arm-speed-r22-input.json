@@ -1,0 +1,10 @@
+{
+  "question": "题目: 每个衣柜有5件衣物;有T恤、裤子两种衣柜。小美想要3件T恤,2条裤子;小帅想要2件T恤,他是双胞胎所以需要双倍T恤;小娜和小美需求一样,但少一件T恤;小杰想要2条裤子;小浩想要2件T恤,1条裤子。设T恤衣柜数量为x,裤子衣柜数量为y,计算x、y。",
+  "context": {
+    "rule": 2,
+    "first": "blue",
+    "mapping_rule": "x、y中数量>=3的代表红色，另一种代表蓝色；x去B区，y去A区",
+    "generator_sha256": "c2d562e8b68dcaca13f57b9d5c44f58218310d35a80b9f4f573a8ca0c1686002",
+    "generator_mode": "competition"
+  }
+}

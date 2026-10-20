@@ -10,3 +10,7 @@
 ## RViz front end and rendering resources
 
 `competition_rviz.cpp` extends the ROS 2 Humble RViz main entry (https://github.com/ros2/rviz), licensed under BSD-3-Clause; full notices are preserved in its header. Project-local rendering assets retain the same upstream notices; font notices remain in their own directories. Only palette sampler bindings are adjusted. See `visualization/rviz_rendering/UPSTREAM_NOTICE.txt`.
+
+## Chinese voice assets
+
+`assets/voice/*.mp3` are synthetic Mandarin speech generated with Microsoft `zh-CN-XiaoxiaoNeural` through edge-tts 7.3.1 (https://github.com/rany2/edge-tts). The tool is a development-only dependency; no Microsoft model, voice engine or service credentials are distributed. Text, generation settings and SHA-256 hashes are in `assets/voice/manifest.json`. The generated audio is not assigned the edge-tts source-code license; use of the underlying service and output is subject to the service provider's terms. Runtime playback is entirely local.

@@ -29,7 +29,9 @@ def generate_launch_description():
     start_gazebo_cmd = ExecuteProcess(
         cmd=['gzserver', '--verbose', world_file_path,
              '-s', 'libgazebo_ros_init.so',
-             '-s', 'libgazebo_ros_factory.so'],
+             '-s', 'libgazebo_ros_factory.so',
+             '--ros-args', '--params-file',
+             os.path.join(FindPackageShare('mybot').find('mybot'),'config','gazebo_runtime.yaml')],
         output='screen')
     start_gazebo_gui_cmd = ExecuteProcess(
         cmd=['gzclient', '--verbose'], output='screen')
@@ -52,7 +54,7 @@ def generate_launch_description():
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'use_sim_time': True}, params, {"publish_frequency":15.0}],
+        parameters=[{'use_sim_time': True}, params, {"publish_frequency":60.0}],
         output='screen'
     )
  

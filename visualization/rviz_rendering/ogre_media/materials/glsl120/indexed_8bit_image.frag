@@ -1,5 +1,6 @@
 #version 120
 #extension GL_ARB_shading_language_420pack : require
+#extension GL_ARB_explicit_attrib_location : require
 
 // Draws an 8-bit image using RGB values from a 256x1 palette texture.
 

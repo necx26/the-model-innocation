@@ -62,7 +62,10 @@ for name,s in stats.items():
     gaps=s.pop('gaps');s['max_sim_gap']=max(gaps,default=0);s['age']=round(now-s.pop('last_progress'),3)
     s['simulation_span']=round(s['last_stamp']-s['first_stamp'],3)
     s['wall_fps']=round(s['unique']/(now-start),2)
-    s['expected_period']=.2 if name.startswith(('overview','oblique')) else .1
+    import sys
+    sys.path.insert(0,str(Path(os.environ['YZBOT_WS'])))
+    from scene_config import SCENE
+    s['expected_period']=1./(SCENE.get('fixed_camera',{}).get('fps',30) if name.startswith(('overview','oblique')) else SCENE['front_camera']['fps'])
     s['estimated_missed_frames']=sum(max(0,round(g/s['expected_period'])-1) for g in gaps)
 report=dict(date=time.strftime('%Y-%m-%d %H:%M:%S'),kernel=platform.release(),project=os.environ.get('YZBOT_PROJECT'),
             dds=os.environ.get('RMW_IMPLEMENTATION'),dds_config=os.environ.get('CYCLONEDDS_URI'),duration=round(now-start,2),

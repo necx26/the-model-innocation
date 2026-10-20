@@ -37,3 +37,8 @@ export PYTHONPATH="$YZBOT_WS${PYTHONPATH:+:$PYTHONPATH}"
 export GAZEBO_PLUGIN_PATH="$YZBOT_WS/install/ros2_linkattacher/lib:$YZBOT_WS/src/yzbot/Move_Obs/build${GAZEBO_PLUGIN_PATH:+:$GAZEBO_PLUGIN_PATH}"
 export GAZEBO_MODEL_PATH="$YZBOT_WS/install/mybot_description/share/mybot_description/worlds${GAZEBO_MODEL_PATH:+:$GAZEBO_MODEL_PATH}"
 export GAZEBO_RESOURCE_PATH="$YZBOT_WS/install/mybot_description/share/mybot_description/worlds${GAZEBO_RESOURCE_PATH:+:$GAZEBO_RESOURCE_PATH}"
+
+# Libraries are read-only bindings of this OS's installed NVIDIA driver.
+if [[ -n ${YZBOT_GRAPHICS_LIBRARY_PATH:-} ]]; then
+  export LD_LIBRARY_PATH="$YZBOT_GRAPHICS_LIBRARY_PATH${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+fi

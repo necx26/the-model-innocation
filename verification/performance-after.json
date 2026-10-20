@@ -1,0 +1,95 @@
+{
+  "target_fps": 240,
+  "render": {
+    "target_fps": 240,
+    "configured_fps": 240,
+    "average_fps": 245.239,
+    "renderer": "NVIDIA GeForce RTX 5060 Laptop GPU/PCIe/SSE2"
+  },
+  "graphics": {
+    "mode": "nvidia-host",
+    "signature": "2c770bb09e2608d5",
+    "devices": [
+      "/dev/nvidia0",
+      "/dev/nvidiactl",
+      "/dev/nvidia-modeset",
+      "/dev/nvidia-uvm",
+      "/dev/dri"
+    ],
+    "host_driver_libraries": 9
+  },
+  "camera_rates": {
+    "front": 51.8,
+    "overview": 29.2,
+    "oblique": 29.2
+  },
+  "recognition_rate": 42.0,
+  "camera_errors": {
+    "front": 0,
+    "overview": 0,
+    "oblique": 0
+  },
+  "ui_layouts": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "all_modules_visible": true,
+      "voice_fits": true
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "all_modules_visible": true,
+      "voice_fits": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "all_modules_visible": true,
+      "voice_fits": true
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "all_modules_visible": true,
+      "voice_fits": true
+    }
+  ],
+  "mission": {
+    "run": "gpu-camera-ui-r27",
+    "elapsed": 253.6,
+    "passed": true,
+    "physical_checks": "5/5",
+    "grasp_attempts": 5
+  },
+  "logic_tests": 99,
+  "phase_comparison": {
+    "same_question": true,
+    "baseline_grasp_place": 82.05000000000001,
+    "new_grasp_place": 72.78999999999999,
+    "baseline_total": 249.7,
+    "new_total": 253.6
+  },
+  "final_phase": "就绪",
+  "task_mode": "exam",
+  "healthy": true,
+  "rviz_healthy": true,
+  "rviz_log_errors": false,
+  "camera_diagnostic_passed": true,
+  "source_matches": true,
+  "final_camera_probe": {
+    "overview": {
+      "fps": 29.99,
+      "decode_errors": 0
+    },
+    "oblique": {
+      "fps": 29.99,
+      "decode_errors": 0
+    },
+    "front": {
+      "fps": 59.87,
+      "decode_errors": 0
+    }
+  },
+  "temporary_graphics_backup_removed": true
+}

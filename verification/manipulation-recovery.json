@@ -1,0 +1,69 @@
+{
+  "run": "arm-region-recovery-r26",
+  "passed": true,
+  "elapsed": 249.7,
+  "physical_checks": [
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "grasp_attempts": 5,
+  "close_camera_corrections": [
+    {
+      "time": 61.21,
+      "text": "行进中新图像校正目标，提前结束旧抵近指令",
+      "target_id": 2,
+      "shift_m": 0.175
+    },
+    {
+      "time": 101.57,
+      "text": "行进中新图像校正目标，提前结束旧抵近指令",
+      "target_id": 4,
+      "shift_m": 0.164
+    },
+    {
+      "time": 149.8,
+      "text": "行进中新图像校正目标，提前结束旧抵近指令",
+      "target_id": 5,
+      "shift_m": 0.156
+    },
+    {
+      "time": 213.68,
+      "text": "行进中新图像校正目标，提前结束旧抵近指令",
+      "target_id": 6,
+      "shift_m": 0.137
+    }
+  ],
+  "grasp_retries": [],
+  "changed_grasp_sides": [],
+  "late_advances": [
+    {
+      "time": 64.72,
+      "text": "抵近图像复核后限速直线夹取",
+      "distance": 0.252,
+      "stop_gap_m": 0.24
+    },
+    {
+      "time": 104.95,
+      "text": "抵近图像复核后限速直线夹取",
+      "distance": 0.263,
+      "stop_gap_m": 0.24
+    },
+    {
+      "time": 153.87,
+      "text": "抵近图像复核后限速直线夹取",
+      "distance": 0.259,
+      "stop_gap_m": 0.24
+    },
+    {
+      "time": 218.02,
+      "text": "抵近图像复核后限速直线夹取",
+      "distance": 0.374,
+      "stop_gap_m": 0.24
+    }
+  ],
+  "placement_side_recoveries": [],
+  "note": "Saved question from failed r25 replayed through the Qwen adapter; advances occur only after close-image localization and failed stationary IK. Side retry mechanism added; not triggered in this passing round."
+}

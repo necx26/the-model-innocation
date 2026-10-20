@@ -1,0 +1,37 @@
+[
+  {
+    "round": 1,
+    "passed": true,
+    "elapsed": 249.7,
+    "remaining": 50.3,
+    "task": {
+      "red": 1,
+      "blue": 4,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "physical_checks": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "phase_seconds": {
+      "大模型解题": 1.01,
+      "离开出生点": 4.08,
+      "经验引导复核": 62.99,
+      "直达目标抓取位": 13.12,
+      "抓取": 36.49,
+      "搬运": 61.81,
+      "放置": 45.56,
+      "目标前方需绕障": 25.25,
+      "完成": 0.0
+    },
+    "max_navigation_pose_age": {
+      "local_costmap": 0.862,
+      "global_costmap": 0.614
+    }
+  }
+]

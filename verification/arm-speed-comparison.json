@@ -1,0 +1,39 @@
+{
+  "baseline": "release-live-blue-r22",
+  "candidate": "arm-region-r23",
+  "same_question": true,
+  "same_task": true,
+  "candidate_question_source": "saved generator question replay (regression only)",
+  "baseline_elapsed": 246.2,
+  "candidate_elapsed": 230.1,
+  "baseline_grasp_place_seconds": 88.03,
+  "candidate_grasp_place_seconds": 82.09,
+  "grasp_place_reduction_percent": 6.75,
+  "action_metric_means": {
+    "pick_reach_descent": {
+      "count": 5,
+      "seconds": 2.6771
+    },
+    "close": {
+      "count": 5,
+      "seconds": 0.29
+    },
+    "arm": {
+      "count": 10,
+      "seconds": 1.4403
+    },
+    "place_reach_descent": {
+      "count": 5,
+      "seconds": 2.9087
+    },
+    "open": {
+      "count": 5,
+      "seconds": 0.2913
+    },
+    "place_raise_stow": {
+      "count": 5,
+      "seconds": 2.8482
+    }
+  },
+  "limitations": "Single same-question regression; total time also differs in LLM and navigation. No universal optimality or real hardware claim."
+}

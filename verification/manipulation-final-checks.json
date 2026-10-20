@@ -1,0 +1,43 @@
+{
+  "phase": "就绪",
+  "mode": "exam",
+  "healthy": true,
+  "camera_advances_in_3s": {
+    "front": 34,
+    "overview": 34,
+    "oblique": 34
+  },
+  "camera_errors": {
+    "front": 0,
+    "overview": 0,
+    "oblique": 0
+  },
+  "runtime_hashes_match": {
+    "ros_ws/patrol_safety.py": true,
+    "ros_ws/manipulation.py": true,
+    "ros_ws/competition_node.py": true,
+    "ros_ws/mission_strategy.py": true,
+    "ros_ws/search_memory.py": true,
+    "ros_ws/search_experience.py": true,
+    "ros_ws/robot_geometry.py": true,
+    "ros_ws/cube_perception.py": true,
+    "ros_ws/mission_review.py": true,
+    "ros_ws/scene_config.json": true,
+    "ros_ws/src/yzbot/bot_navigation/param/competition_nav2.yaml": true,
+    "native/restart-navigation.sh": true,
+    "native/navigation_process.py": true,
+    "native/wait_ready.py": true,
+    "native/start.sh": true
+  },
+  "rviz_healthy": true,
+  "rviz_display_count": 8,
+  "full_round": {
+    "name": "arm-region-recovery-r26",
+    "elapsed": 249.7,
+    "physical_checks": "5/5",
+    "grasp_attempts": 5
+  },
+  "logic_tests": 99,
+  "patrol_runtime_passed": true,
+  "usb_touched": false
+}

@@ -54,6 +54,7 @@ from robot_geometry import NAV_FOOTPRINT, point_in_footprint, lidar_front_lane_c
 from mission_review import review_markdown
 from search_experience import SearchExperience
 from robot_geometry import grasp_preflight_valid
+from manipulation import capture_geometry,forward_capture_stops,gripper_feedback_ready,floor_chassis_clearance
 
 BASE = FilePath(os.environ.get('YZBOT_WS') or FilePath(__file__).resolve().parent)
 LOG = FilePath(os.environ.get('YZBOT_LOG') or BASE/'logs')
@@ -78,6 +79,8 @@ class Competition(Node):
                          automatically_declare_parameters_from_overrides=True)
         self.lock = threading.RLock()
         self.models, self.links, self.joints = {}, {}, {}
+        self.joint_feedback_time=0.;self.joint_feedback_sequence=0
+        self.manipulation_metrics=[]
         self.image, self.info, self.image_time = None, None, 0.
         self.image_stamp = None
         self.frames = deque(maxlen=30)
@@ -148,7 +151,7 @@ class Competition(Node):
                       'result': [], 'running': False, 'elapsed': 0., 'remaining': 300.}
         self.state['task_mode'] = self.task_mode
         self.state['runtime_source_sha256'] = hashlib.sha256(FilePath(__file__).read_bytes()).hexdigest()
-        source_files=['competition_node.py','mission_strategy.py','search_memory.py','search_experience.py',
+        source_files=['patrol_safety.py','manipulation.py','competition_node.py','mission_strategy.py','search_memory.py','search_experience.py',
                       'robot_geometry.py','cube_perception.py','mission_review.py','scene_config.json',
                       'src/yzbot/bot_navigation/param/competition_nav2.yaml']
         self.state['runtime_source_files_sha256']={
@@ -228,7 +231,7 @@ class Competition(Node):
         self.create_timer(.5, self.publish_status)
         self.footprint_pub=self.create_publisher(PolygonStamped,'/competition/footprint',10)
         self.create_timer(.2,self.publish_footprint)
-        # Front camera publishes at up to 30 Hz; poll at 100 Hz in sim time.
+        # Front camera publishes at up to 60 Hz; poll at 100 Hz in sim time.
         # The timestamp guard below still ensures each frame is processed once.
         self.create_timer(.01,self.observe_scene)
         self.create_timer(.1,self.update_dynamic_speed)
@@ -289,6 +292,7 @@ class Competition(Node):
 
     def joint_cb(self, msg):
         self.joints.update(zip(msg.name, msg.position))
+        self.joint_feedback_time=time.monotonic();self.joint_feedback_sequence+=1
 
     def compressed_image_cb(self, view, msg):
         now = time.monotonic()
@@ -674,15 +678,15 @@ class Competition(Node):
             if result.status==4:return True
         return False
 
-    def go(self, x, y, yaw, look_for=None, align_tolerance=.045, align_yaw_tolerance=.035, arrive_region=None):
-        try:return self._go_once(x,y,yaw,look_for,align_tolerance,align_yaw_tolerance,arrive_region)
+    def go(self, x, y, yaw, look_for=None, align_tolerance=.045, align_yaw_tolerance=.035, arrive_region=None, pickup_target=None):
+        try:return self._go_once(x,y,yaw,look_for,align_tolerance,align_yaw_tolerance,arrive_region,pickup_target)
         except (RuntimeError,TimeoutError) as error:
             self.check()
             self.event('导航受阻，检查转身空间',reason=str(error))
             if not self.recover_turning_clearance():raise
-            return self._go_once(x,y,yaw,look_for,align_tolerance,align_yaw_tolerance,arrive_region)
+            return self._go_once(x,y,yaw,look_for,align_tolerance,align_yaw_tolerance,arrive_region,pickup_target)
 
-    def _go_once(self, x, y, yaw, look_for=None, align_tolerance=.045, align_yaw_tolerance=.035, arrive_region=None):
+    def _go_once(self, x, y, yaw, look_for=None, align_tolerance=.045, align_yaw_tolerance=.035, arrive_region=None, pickup_target=None):
         self.check()
         if not self.nav.wait_for_server(timeout_sec=5):
             raise RuntimeError('Nav2 action server 不可用')
@@ -708,6 +712,7 @@ class Competition(Node):
         end=time.monotonic()+65
         progress_pose=self.robot_pose();progress_time=time.monotonic()
         navigation_started=time.monotonic();previous_pose=progress_pose
+        close_checked=0.
         travelled=0.;turned=0.;stationary_turn=0.;outcome='cancelled'
         try:
             while not future.done():
@@ -718,6 +723,22 @@ class Competition(Node):
                     self.vel.publish(Twist())
                     return False
                 pose=self.robot_pose()
+                if pickup_target and time.monotonic()-close_checked>.1:
+                    close_checked=time.monotonic()
+                    if self.refresh_close_target(pickup_target):
+                        self.wait(handle.cancel_goal_async(),3);self.wait(future,4)
+                        self.vel.publish(Twist());outcome='close_camera_retarget'
+                        return True
+                if pickup_target and pose and abs(self.forward_speed)<.35:
+                    point=(pickup_target['x'],pickup_target['y'])
+                    root=(pose[0]-.14*math.cos(pose[2]),pose[1]-.14*math.sin(pose[2]))
+                    if (capture_geometry(pose,point,max_radial=.385)
+                            and time.monotonic()-self.image_time<.5
+                            and self.field.direct_base_path_clear(root,point,min_clearance=.08)):
+                        self.wait(handle.cancel_goal_async(),3);self.wait(future,4)
+                        self.vel.publish(Twist());outcome='pickup_region_reachable'
+                        self.event('已进入抓取工作区，取消多余底盘对准',target_id=pickup_target['id'])
+                        return True
                 if arrive_region and pose:
                     zone,preferred,occupied=arrive_region
                     if math.dist(pose[:2],zone)<.95 and usable_drop_candidates(self.field,zone,preferred,pose,occupied):
@@ -754,7 +775,10 @@ class Competition(Node):
             self.navigation_metrics=self.navigation_metrics[-100:]
         if result.status != 4:
             raise RuntimeError(f'Nav2 未到达目标，状态 {result.status}')
-        self.align(x, y, yaw, position_tolerance=align_tolerance, yaw_tolerance=align_yaw_tolerance)
+        if pickup_target and self.capture_preflight(pickup_target):
+            self.event('到达姿态可直接伸臂，跳过底盘精对准',target_id=pickup_target['id'])
+        else:
+            self.align(x,y,yaw,position_tolerance=align_tolerance,yaw_tolerance=align_yaw_tolerance)
         return True
 
     def align(self, x, y, yaw, position_tolerance=.045, yaw_tolerance=.035):
@@ -832,43 +856,70 @@ class Competition(Node):
                 return [data[j] for j in JOINTS]
         raise RuntimeError(f'MoveIt IK 无可行解: {p.round(3).tolist()}')
 
-    def arm(self, values, speed=1.0):
-        req=GetMotionPlan.Request()
-        r=req.motion_plan_request
-        r.group_name='arm'; r.start_state=self.robot_state()
-        r.allowed_planning_time=3.; r.num_planning_attempts=5
-        r.max_velocity_scaling_factor=speed; r.max_acceleration_scaling_factor=speed
-        c=Constraints()
-        for j,v in zip(JOINTS,values):
-            c.joint_constraints.append(JointConstraint(joint_name=j,position=float(v),tolerance_above=.002,tolerance_below=.002,weight=1.))
-        r.goal_constraints=[c]
+    def plan_arm(self,values,speed,start_state=None):
+        req=GetMotionPlan.Request();r=req.motion_plan_request
+        r.group_name='arm';r.start_state=start_state or self.robot_state()
+        r.allowed_planning_time=3.;r.num_planning_attempts=5
+        r.max_velocity_scaling_factor=speed;r.max_acceleration_scaling_factor=speed
+        r.goal_constraints=[Constraints(joint_constraints=[
+            JointConstraint(joint_name=j,position=float(v),tolerance_above=.002,
+                            tolerance_below=.002,weight=1.) for j,v in zip(JOINTS,values)])]
         result=self.call(self.planner,req,10).motion_plan_response
-        if result.error_code.val!=1:
-            raise RuntimeError(f'MoveIt 规划失败: {result.error_code.val}')
+        if result.error_code.val!=1:raise RuntimeError(f'MoveIt 规划失败: {result.error_code.val}')
         traj=result.trajectory.joint_trajectory
-        traj.header.stamp=Time().to_msg()
+        if not traj.points:raise RuntimeError('MoveIt 返回空轨迹')
+        return traj
+
+    def arm_sequence(self,waypoints,label='arm'):
+        """Plan each segment with collisions, then execute one timed trajectory.
+
+        Segment endpoints retain their planned zero velocities. No unchecked
+        joint interpolation or artificial trajectory speedup is introduced.
+        """
+        started=time.monotonic();state=self.robot_state();combined=None;offset=0
+        for values,speed in waypoints:
+            segment=self.plan_arm(values,speed,state)
+            if combined is None:
+                combined=copy.deepcopy(segment);offset=0
+            else:
+                if segment.joint_names!=combined.joint_names:raise RuntimeError('分段机械臂关节顺序不一致')
+                for point in segment.points:
+                    t=point.time_from_start.sec*1_000_000_000+point.time_from_start.nanosec
+                    if t==0:continue
+                    point=copy.deepcopy(point);stamp=offset+t
+                    point.time_from_start=Duration(sec=stamp//1_000_000_000,nanosec=stamp%1_000_000_000)
+                    combined.points.append(point)
+            last=combined.points[-1];offset=last.time_from_start.sec*1_000_000_000+last.time_from_start.nanosec
+            positions=dict(zip(combined.joint_names,last.positions))
+            state=copy.deepcopy(state)
+            state.joint_state.position=[positions.get(j,v) for j,v in zip(state.joint_state.name,state.joint_state.position)]
+        plan_seconds=time.monotonic()-started
+        combined.header.stamp=Time().to_msg()
         if not self.arm_action.wait_for_server(timeout_sec=2):raise RuntimeError('机械臂动作控制器不可用')
-        goal=FollowJointTrajectory.Goal(trajectory=traj)
+        goal=FollowJointTrajectory.Goal(trajectory=combined)
         handle=self.wait(self.arm_action.send_goal_async(goal),5)
         if not handle.accepted:raise RuntimeError('机械臂控制器拒绝轨迹')
-        self.arm_handle=handle
-        pending=handle.get_result_async()
-        duration=traj.points[-1].time_from_start
-        deadline=time.monotonic()+max(8,duration.sec+duration.nanosec/1e9+5)
-        stable=0
+        self.arm_handle=handle;pending=handle.get_result_async();values=waypoints[-1][0]
+        deadline=time.monotonic()+max(8,offset/1e9+5)
         while time.monotonic()<deadline:
             self.check()
+            if time.monotonic()-self.joint_feedback_time>.5:raise RuntimeError('机械臂关节反馈过期，停止执行')
             err=max(abs(self.joints.get(j,99)-v) for j,v in zip(JOINTS,values))
             if pending.done():
                 outcome=pending.result()
                 if outcome.status==4 and err<.012:
-                    self.arm_handle=None;return
+                    self.arm_handle=None
+                    metric=dict(label=label,segments=len(waypoints),plan_seconds=round(plan_seconds,4),
+                                trajectory_seconds=round(offset/1e9,4),total_seconds=round(time.monotonic()-started,4),
+                                final_joint_error=round(err,5))
+                    self.manipulation_metrics.append(metric);self.state['manipulation_metrics']=self.manipulation_metrics
+                    return
                 if outcome.status!=4:raise RuntimeError('机械臂动作失败：'+outcome.result.error_string)
-            stable=stable+1 if err<.008 else 0
-            if stable>=5:
-                self.arm_handle=None;return
-            time.sleep(.08)
+            time.sleep(.03)
         raise RuntimeError(f'机械臂跟踪未达到目标，最大关节误差 {err:.3f}')
+
+    def arm(self,values,speed=1.0):
+        self.arm_sequence([(values,speed)])
 
     def arm_xyz(self,x,y,z,speed=.9,world_yaw=None):
         self.arm(self.solve_ik(x,y,z,world_yaw=world_yaw),speed=speed)
@@ -965,12 +1016,26 @@ class Competition(Node):
                 handle.cancel_goal_async()
             self.nav_handle=None
 
-    def grip(self, closed):
-        m=JointTrajectory(joint_names=['finger_joint1'])
-        m.points=[JointTrajectoryPoint(positions=[.015 if closed else 0.],time_from_start=Duration(nanosec=500_000_000))]
-        self.grip_pub.publish(m)
-        time.sleep(.55)
-        self.state['gripper']='闭合' if closed else '张开'
+    def grip(self,closed):
+        target=.015 if closed else 0.
+        msg=JointTrajectory(joint_names=['finger_joint1'])
+        msg.points=[JointTrajectoryPoint(positions=[target],time_from_start=Duration(nanosec=250_000_000))]
+        started=time.monotonic();sequence=self.joint_feedback_sequence
+        self.grip_pub.publish(msg);previous=None;stable=0
+        while time.monotonic()-started<.8:
+            self.check();value=self.joints.get('finger_joint1',float('nan'))
+            fresh=self.joint_feedback_sequence!=sequence and time.monotonic()-self.joint_feedback_time<.15
+            ready=gripper_feedback_ready(value,previous,target,time.monotonic()-started,fresh)
+            stable=stable+1 if ready else 0
+            if stable>=2:
+                self.state['gripper']='闭合' if closed else '张开'
+                self.manipulation_metrics.append(dict(label='close' if closed else 'open',
+                                                      total_seconds=round(time.monotonic()-started,4)))
+                self.state['manipulation_metrics']=self.manipulation_metrics
+                return
+            if fresh:previous=value;sequence=self.joint_feedback_sequence
+            time.sleep(.02)
+        raise RuntimeError('夹爪反馈未确认到位，停止后续抓放')
 
     def vision(self, with_pose=False):
         if self.image is None or time.monotonic()-self.image_time>3:
@@ -1020,7 +1085,7 @@ class Competition(Node):
             if rp:
                 dx,dy=point[0]-rp[0],point[1]-rp[1]
                 bx,by=math.cos(rp[2])*dx+math.sin(rp[2])*dy,-math.sin(rp[2])*dx+math.cos(rp[2])*dy
-                if point_in_footprint(bx,by):d['reason']='车身范围';continue
+                if floor_chassis_clearance((bx,by))<.04:d['reason']='车身范围';continue
                 if self.held_model and math.hypot(bx,by)<.65:d['reason']='携带货物近车身区域';continue
             if in_delivery_area(point, extra=.1):d['reason']='已在放置区';continue
             cell=self.field.cell(point)
@@ -1155,6 +1220,7 @@ class Competition(Node):
             self.run_id=time.strftime('%Y%m%d-%H%M%S')+'-'+str(time.time_ns()%1000000)
             (LOG/'runs'/self.run_id).mkdir(parents=True,exist_ok=True)
             self.phase_timings={};self.phase_started=time.monotonic()
+            self.manipulation_metrics=[];self.state['manipulation_metrics']=self.manipulation_metrics
             # New randomized positions invalidate earlier point-specific priors.
             self.experience=(None if self.state.get('layout_randomized') else
                              SearchExperience(self.field,BASE/'src/yzbot/bot_navigation/maps/map.yaml',
@@ -1369,6 +1435,35 @@ class Competition(Node):
                 self.check()
                 self.event('观察点暂时不可达，重新选择',reason=str(e))
 
+    def refresh_close_target(self,target):
+        pose=self.robot_pose()
+        if not pose or math.dist(pose[:2],(target['x'],target['y']))>1.5:return False
+        if time.monotonic()-self.image_time>.5:return False
+        candidates=[d for d in self.vision() if d['color']==target['color']
+                    and d.get('pose_fit_error_px') is not None
+                    and math.dist((d['x'],d['y']),(target['x'],target['y']))<.30]
+        if not candidates:return False
+        d=min(candidates,key=lambda d:math.dist((d['x'],d['y']),(target['x'],target['y'])))
+        shift=math.dist((d['x'],d['y']),(target['x'],target['y']))
+        if shift<=.045 or math.dist(pose[:2],(d['x'],d['y']))>.75:return False
+        target.update(x=d['x'],y=d['y'],hits=max(3,target.get('hits',0)))
+        self.active_target_position=(d['x'],d['y'])
+        self.event('行进中新图像校正目标，提前结束旧抵近指令',target_id=target['id'],shift_m=round(shift,3))
+        return True
+
+    def capture_preflight(self,target,max_seeds=2):
+        """Propose an arm reach from the actual stopped base, in any direction."""
+        pose=self.robot_pose();point=(target['x'],target['y'])
+        if not capture_geometry(pose,point):return None
+        root=(pose[0]-.14*math.cos(pose[2]),pose[1]-.14*math.sin(pose[2]))
+        if not self.field.direct_base_path_clear(root,point,min_clearance=.08):return None
+        try:
+            grip_yaw=square_gripper_yaw(pose[2])
+            hover=self.solve_ik(*point,.18,max_seeds=max_seeds,world_yaw=grip_yaw)
+            descent=self.solve_ik(*point,.10,max_seeds=max_seeds,world_yaw=grip_yaw)
+        except RuntimeError:return None
+        return dict(base=pose,target=point,world_yaw=grip_yaw,hover=hover,descent=descent,time=time.monotonic())
+
     def approach_target(self, selection):
         self.grasp_preflight=None
         target=selection['target']
@@ -1382,18 +1477,39 @@ class Competition(Node):
         # static map can reject a clear center lane near partition corners, so
         # fresh lidar validates that case after the single heading adjustment.
         pregrasp=selection.get('pregrasp',selection['view'])
-        stage=(target['x']-.50*math.cos(pregrasp[2]),
-               target['y']-.50*math.sin(pregrasp[2]),pregrasp[2])
+        stage=(target['x']-.25*math.cos(pregrasp[2]),
+               target['y']-.25*math.sin(pregrasp[2]),pregrasp[2])
         if self.field.safe(stage) and self.field.direct_base_path_clear(stage,pregrasp):
             pregrasp=stage
         pose=self.robot_pose()
-        direct=False
-        if pose:
+        direct=False;region_ready=False
+        # An already reachable cube needs no chassis heading correction.
+        # Geometry alone never permits execution: IK, map and fresh visual
+        # refinement below still gate the actual grasp.
+        if pose and self.capture_preflight(target):
+            region_ready=True
+            selection['grasp']=pose
+            self.event('目标进入机械臂工作区，保持底盘姿态',target_id=target['id'])
+        elif pose:
+            # Preserve the present heading for nearby lateral targets when a
+            # short straight drive provides arm reach outside the swept base.
+            stops=forward_capture_stops(pose,(target['x'],target['y']))
+            # A small workspace margin avoids stopping at maximum extension.
+            for travel,candidate in stops[3:]+stops[:3]:
+                if travel<.06:continue
+                if (self.field.safe(candidate) and self.field.direct_base_path_clear(pose,candidate)
+                        and self.lidar_lane_clear(travel)):
+                    pregrasp=candidate;direct=True
+                    selection['grasp']=candidate
+                    selection['direct_from_current']=True
+                    self.event('沿当前朝向驶入侧向抓取区',distance=round(travel,3),target_id=target['id'])
+                    break
+        if pose and not region_ready and not direct:
             tx,ty=float(target['x']),float(target['y'])
             distance=math.hypot(tx-pose[0],ty-pose[1])
             if distance>.30 and self.field.line_free(pose[:2],(tx,ty)):
                 yaw=math.atan2(ty-pose[1],tx-pose[0])
-                gap=min(.50,distance)
+                gap=min(.25,distance)
                 candidate=(tx-gap*math.cos(yaw),ty-gap*math.sin(yaw),yaw)
                 if self.field.safe(candidate):
                     pregrasp=candidate
@@ -1425,14 +1541,22 @@ class Competition(Node):
             handle=self.wait(self.drive_action.send_goal_async(command),5)
             if not handle.accepted:raise RuntimeError('Nav2 拒绝目标直线靠近')
             self.nav_handle=handle
-            pending=handle.get_result_async()
-            try:outcome=self.wait(pending,15)
+            pending=handle.get_result_async();deadline=time.monotonic()+15;retargeted=False
+            try:
+                while not pending.done():
+                    self.check()
+                    if self.refresh_close_target(target):
+                        self.wait(handle.cancel_goal_async(),3);self.wait(pending,4)
+                        self.vel.publish(Twist());retargeted=True;break
+                    if time.monotonic()>deadline:raise TimeoutError('目标直线抵近超时')
+                    time.sleep(.1)
+                outcome=pending.result()
             finally:
                 if not pending.done():handle.cancel_goal_async()
                 self.nav_handle=None
             after=self.robot_pose()
             remaining=math.dist(after[:2],pregrasp[:2]) if after else math.inf
-            if outcome.status==4 and remaining<=.18:
+            if retargeted or (outcome.status==4 and remaining<=.18):
                 self.event('朝相机确认目标直线驶向抓取点',distance=round(forward,3),
                            remaining=round(remaining,3),lateral_error=round(lateral,3),
                            heading_correction=round(yaw_error,3))
@@ -1440,9 +1564,9 @@ class Competition(Node):
                 self.event('直线受障碍截停，继续导航到抓取点',remaining=round(remaining,3),
                            action_status=outcome.status)
                 direct=False
-        if not direct:
+        if not direct and not region_ready:
             self.update('目标前方需绕障', '通道被隔板或障碍挡住，沿安全路径到达抓取侧')
-            self.go(*pregrasp,align_tolerance=.10,align_yaw_tolerance=.06)
+            self.go(*pregrasp,align_tolerance=.10,align_yaw_tolerance=.06,pickup_target=target)
         self.settle_base()
         time.sleep(.10)
         detections=[d for d in self.vision() if d['color']==target['color']
@@ -1509,13 +1633,14 @@ class Competition(Node):
                        fresh_frames=len(samples))
         pose=self.robot_pose()
         distance=math.hypot(d['x']-pose[0],d['y']-pose[1])
-        if distance>.28:
+        reachable=self.capture_preflight(d)
+        if distance>.24 and reachable is None:
             if distance>.85:raise RuntimeError('抵近后的视觉距离异常，取消最后推进')
             if d.get('source')=='confirmed_camera_memory' and not samples:
                 raise RuntimeError('没有抵近图像复核，取消最后推进')
             yaw=math.atan2(d['y']-pose[1],d['x']-pose[0])
             self.align(pose[0],pose[1],yaw,position_tolerance=.025,yaw_tolerance=.04)
-            forward=distance-.24
+            forward=max(.01,distance-.23)
             command=DriveOnHeading.Goal(target=Point(x=float(forward)),speed=.22,
                                         time_allowance=Duration(sec=8))
             handle=self.wait(self.drive_action.send_goal_async(command),5)
@@ -1529,14 +1654,16 @@ class Competition(Node):
             self.settle_base()
             self.event('抵近图像复核后限速直线夹取',distance=round(forward,3),stop_gap_m=.24)
         else:
-            yaw=selection['grasp'][2]
-        # Stop the base 22 cm before the target: this keeps the cube in view,
-        # clears the chassis, and leaves the last reach to the arm.
-        grasp=(d['x']-.24*math.cos(yaw),d['y']-.24*math.sin(yaw),yaw)
+            yaw=pose[2]
+        # Preserve the actual stopped pose whenever IK can handle the image
+        # correction. A nominal frontal stop is only a navigation fallback.
+        grasp=self.robot_pose() if reachable else (d['x']-.24*math.cos(yaw),d['y']-.24*math.sin(yaw),yaw)
+        selection['grasp']=grasp
         if not self.field.safe(grasp):raise RuntimeError('精对准抓取位姿靠墙，换其他目标')
         # The chassis has already reached the single image-guided stop pose.
         # Do not send another base goal after reacquiring the cube.
-        self.event('保持安全间距，机械臂直接抓取',base_target_gap_m=.24)
+        self.event('保持安全间距，机械臂直接抓取',base_target_gap_m=round(math.dist(self.robot_pose()[:2],(d['x'],d['y'])),3),
+                   relative_bearing=round(angle(math.atan2(d['y']-self.robot_pose()[1],d['x']-self.robot_pose()[0])-self.robot_pose()[2]),3))
         # Simulator identity is resolved only here, after image-guided arrival.
         # It supplies attachment identity/contact verification, never a search goal.
         available=[(name,p) for name,p in self.models.items()
@@ -1551,8 +1678,11 @@ class Competition(Node):
         # keeping the same visually confirmed cube.
         try:
             grip_yaw=square_gripper_yaw(self.robot_pose()[2])
-            hover=self.solve_ik(d['x'],d['y'],.18,world_yaw=grip_yaw)
-            descent=self.solve_ik(d['x'],d['y'],.10,world_yaw=grip_yaw)
+            if grasp_preflight_valid(reachable,self.robot_pose(),(d['x'],d['y']),grip_yaw,time.monotonic()):
+                hover,descent=reachable['hover'],reachable['descent']
+            else:
+                hover=self.solve_ik(d['x'],d['y'],.18,world_yaw=grip_yaw)
+                descent=self.solve_ik(d['x'],d['y'],.10,world_yaw=grip_yaw)
         except RuntimeError as first_ik_error:
             pose=self.robot_pose()
             if not pose:raise
@@ -1616,8 +1746,7 @@ class Competition(Node):
             descent=self.solve_ik(d['x'],d['y'],.10,world_yaw=grip_yaw)
         self.grasp_preflight=None
         self.event('手腕按方块边缘对齐，车身无需额外转向',world_gripper_yaw=round(grip_yaw,3))
-        self.arm(hover)
-        self.arm(descent,speed=.55)
+        self.arm_sequence([(hover,1.0),(descent,.85)],label='pick_reach_descent')
         p=self.models[name].position;hand=self.links.get('six_arm::link6')
         if hand is None:raise RuntimeError('缺少真实末端 link6 位姿')
         distance=math.dist([p.x,p.y,p.z],[hand.position.x,hand.position.y,hand.position.z])
@@ -1705,11 +1834,21 @@ class Competition(Node):
                     cost=travel/float(SCENE.get('cruise_speed_mps',1.5))+.35*turns+math.dist(landing,(zx,zy))
                     if math.isfinite(cost):options.append((cost,landing,base))
                 if not options:raise RuntimeError('放置区没有避开已放货物的可达停靠侧')
-                _,(px,py),drop_base=min(options,key=lambda item:item[0])
-                self.event('联合选择空闲落点与停靠侧',zone=zone,landing=[px,py],base=list(drop_base))
-                self.update('搬运',f'携带 {name} 前往 {zone} 区')
-                self.go(*drop_base,align_tolerance=.10,align_yaw_tolerance=math.pi,
-                        arrive_region=((zx,zy),(px,py),occupied))
+                attempted_sides=[];delivery_error=None
+                for _,(px,py),drop_base in sorted(options,key=lambda item:item[0]):
+                    if any(abs(angle(drop_base[2]-yaw))<.5 for yaw in attempted_sides):continue
+                    attempted_sides.append(drop_base[2])
+                    self.event('联合选择空闲落点与停靠侧',zone=zone,landing=[px,py],base=list(drop_base))
+                    self.update('搬运',f'携带 {name} 前往 {zone} 区')
+                    try:
+                        self._go_once(*drop_base,align_tolerance=.10,align_yaw_tolerance=math.pi,
+                                      arrive_region=((zx,zy),(px,py),occupied))
+                        delivery_error=None;break
+                    except (RuntimeError,TimeoutError) as error:
+                        self.check();delivery_error=error
+                        self.event('当前放置侧被占用，切换其他停靠侧',zone=zone,reason=str(error))
+                        if len(attempted_sides)>=3:break
+                if delivery_error is not None:raise RuntimeError(f'放置区多个停靠侧均未到达: {delivery_error}')
                 self.settle_base()
                 self.update('放置',f'正在把 {name} 放入 {zone} 区')
                 self.perception_paused=True
@@ -1742,7 +1881,7 @@ class Competition(Node):
                         except RuntimeError:continue
                     if release is None:raise RuntimeError('安全停靠后仍无通过 IK 核验且可以退出的区内落点')
                     hover_joints,release_joints=release
-                self.arm(hover_joints,speed=.9);self.arm(release_joints,speed=.65)
+                self.arm_sequence([(hover_joints,1.0),(release_joints,.85)],label='place_reach_descent')
                 req=DetachLink.Request(model1_name='six_arm',link1_name='link6',model2_name=name,link2_name='link')
                 r=self.call(self.detach,req)
                 if not r.success:raise RuntimeError(r.message)
@@ -1762,9 +1901,9 @@ class Competition(Node):
                 self.state['result'].append(result);self.event('放置位置确认',**result)
                 # Return to the already validated hover pose. Raising at the
                 # same XY to an arbitrary height can be outside joint limits.
-                self.arm(hover_joints,speed=.9)
                 rp=self.robot_pose()
-                self.arm_xyz(rp[0]+.10*math.cos(rp[2]),rp[1]+.10*math.sin(rp[2]),.43)
+                stow=self.solve_ik(rp[0]+.10*math.cos(rp[2]),rp[1]+.10*math.sin(rp[2]),.43)
+                self.arm_sequence([(hover_joints,1.0),(stow,1.0)],label='place_raise_stow')
                 # Region placement can leave cargo beside or behind the base;
                 # depart away from its actual landing, always collision checked.
                 self.retreat_after_drop((p.x,p.y))
@@ -1822,6 +1961,18 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path=self.path.split('?')[0]
+        if path.startswith('/api/voice/'):
+            # Serve only the portable voice pack, never arbitrary project files.
+            name=path[len('/api/voice/'):]
+            voice_root=BASE.parent/'assets/voice'
+            allowed={'manifest.json':'application/json; charset=utf-8','player.js':'application/javascript; charset=utf-8'}
+            if name not in allowed:
+                if not (name.endswith('.mp3') and name[:-4] and
+                        all(c in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in name[:-4])):
+                    return self.reply(b'not found',code=404)
+            file=voice_root/name
+            if not file.is_file():return self.reply(b'voice asset missing',code=404)
+            return self.reply(file.read_bytes(),allowed.get(name,'audio/mpeg'))
         if path=='/api/state':return self.reply(json.dumps(app.snapshot(),ensure_ascii=False).encode())
         if path in ('/api/image', '/api/image/raw'):
             if app.image is None:return self.reply(b'',code=503)

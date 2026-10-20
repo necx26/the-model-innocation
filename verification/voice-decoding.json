@@ -1,0 +1,147 @@
+[
+  {
+    "file": "approach.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "approach_blocked.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_blue.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_blue_a.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_blue_b.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_blue_c.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_red.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_red_a.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_red_b.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_red_c.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_target.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_target_a.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_target_b.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "carry_target_c.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "complete.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "disconnected.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "enabled.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "grasp_blue.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "grasp_red.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "grasp_target.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "incomplete.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "place.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "prepare.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "ready.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "reset_failed.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "search.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "solve.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "stopped.mp3",
+    "passed": true,
+    "error": ""
+  },
+  {
+    "file": "waiting.mp3",
+    "passed": true,
+    "error": ""
+  }
+]

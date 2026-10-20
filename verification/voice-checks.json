@@ -1,0 +1,358 @@
+{
+  "scope": "Browser audio decoding/playback and portable copied assets; no physical listening or USB boot test",
+  "externalNetworkBlocked": true,
+  "liveEnable": {
+    "enabled": true,
+    "context": "running",
+    "playing": true,
+    "hint": "正在播报 · 中文女声",
+    "caption": "机器人已就绪，可以开始考试。",
+    "time": 1.792
+  },
+  "audioClockAdvances": true,
+  "decoded": [
+    {
+      "id": "enabled",
+      "duration": 5.256,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10913919856495878,
+      "peak": 0.5901525616645813
+    },
+    {
+      "id": "ready",
+      "duration": 3.36,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10023266098408175,
+      "peak": 0.5946222543716431
+    },
+    {
+      "id": "solve",
+      "duration": 4.92,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10052236981069088,
+      "peak": 0.5388388633728027
+    },
+    {
+      "id": "search",
+      "duration": 3,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10392278439665605,
+      "peak": 0.6681768894195557
+    },
+    {
+      "id": "approach",
+      "duration": 4.128,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09266727105490785,
+      "peak": 0.614736795425415
+    },
+    {
+      "id": "approach_blocked",
+      "duration": 3.528,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09999793872702295,
+      "peak": 0.5488289594650269
+    },
+    {
+      "id": "grasp_red",
+      "duration": 3.768,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10397998863374983,
+      "peak": 0.6684383153915405
+    },
+    {
+      "id": "grasp_blue",
+      "duration": 3.72,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10418153516030636,
+      "peak": 0.6477197408676147
+    },
+    {
+      "id": "grasp_target",
+      "duration": 3.744,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10842861506646015,
+      "peak": 0.682830810546875
+    },
+    {
+      "id": "carry_red",
+      "duration": 4.224,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10235464735832142,
+      "peak": 0.5268719792366028
+    },
+    {
+      "id": "carry_blue",
+      "duration": 4.224,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.0997538733696893,
+      "peak": 0.5347103476524353
+    },
+    {
+      "id": "carry_target",
+      "duration": 3.888,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.0980418206875446,
+      "peak": 0.577629804611206
+    },
+    {
+      "id": "place",
+      "duration": 4.512,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.08656943346565193,
+      "peak": 0.668964684009552
+    },
+    {
+      "id": "complete",
+      "duration": 4.8,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10735967798420999,
+      "peak": 0.7969040274620056
+    },
+    {
+      "id": "incomplete",
+      "duration": 4.656,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.11370925216820828,
+      "peak": 0.6807444095611572
+    },
+    {
+      "id": "stopped",
+      "duration": 5.184,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09866740548218005,
+      "peak": 0.5837539434432983
+    },
+    {
+      "id": "prepare",
+      "duration": 3.384,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09790562166060768,
+      "peak": 0.5459169745445251
+    },
+    {
+      "id": "reset_failed",
+      "duration": 3.816,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10647482643980737,
+      "peak": 0.5647463202476501
+    },
+    {
+      "id": "waiting",
+      "duration": 1.896,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.10275125882718297,
+      "peak": 0.5552911162376404
+    },
+    {
+      "id": "disconnected",
+      "duration": 4.296,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.11170414573144336,
+      "peak": 0.6008780598640442
+    },
+    {
+      "id": "carry_red_a",
+      "duration": 3.96,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09716680847987455,
+      "peak": 0.5268719792366028
+    },
+    {
+      "id": "carry_red_b",
+      "duration": 3.936,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09736307973319677,
+      "peak": 0.5268719792366028
+    },
+    {
+      "id": "carry_red_c",
+      "duration": 3.96,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.0966791084140599,
+      "peak": 0.5316843390464783
+    },
+    {
+      "id": "carry_blue_a",
+      "duration": 3.984,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09411896290243951,
+      "peak": 0.5347103476524353
+    },
+    {
+      "id": "carry_blue_b",
+      "duration": 3.96,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09435422078368734,
+      "peak": 0.5347103476524353
+    },
+    {
+      "id": "carry_blue_c",
+      "duration": 3.984,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09371598890017244,
+      "peak": 0.5347103476524353
+    },
+    {
+      "id": "carry_target_a",
+      "duration": 3.912,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09498976004104764,
+      "peak": 0.5303802490234375
+    },
+    {
+      "id": "carry_target_b",
+      "duration": 3.888,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.09490150831361648,
+      "peak": 0.5303802490234375
+    },
+    {
+      "id": "carry_target_c",
+      "duration": 3.912,
+      "rate": 48000,
+      "channels": 1,
+      "rms": 0.0944139145854578,
+      "peak": 0.5384243130683899
+    }
+  ],
+  "lifecycle": {
+    "first": true,
+    "duplicateSkipped": true,
+    "replaced": true,
+    "carry": true,
+    "newestOnly": true,
+    "disabledCancels": true,
+    "captionPreserved": true
+  },
+  "phaseMapping": [
+    {
+      "id": "carry_red_a",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_red_b",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_red_c",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_blue_a",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_blue_b",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_blue_c",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_target_a",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_target_b",
+      "valid": true,
+      "chinese": true
+    },
+    {
+      "id": "carry_target_c",
+      "valid": true,
+      "chinese": true
+    }
+  ],
+  "missingPack": {
+    "failedClearly": true,
+    "captionOnly": true
+  },
+  "portableFilePreview": {
+    "url": "file:///home/necx/%E6%9C%BA%E5%99%A8%E4%BA%BA%E6%AF%94%E8%B5%9B%E4%B8%AA%E4%BA%BA%E7%89%88/.runtime/portable-voice-check/%E5%B8%A6%E7%A9%BA%E6%A0%BC%20%E7%9A%84%E7%A7%BB%E5%8A%A8%E7%9B%AE%E5%BD%95/%E9%A1%B9%E7%9B%AE/assets/voice/%E8%AF%95%E5%90%AC.html",
+    "ready": 4,
+    "playing": true,
+    "time": 0.74947,
+    "duration": 5.256,
+    "error": null
+  },
+  "externalRequests": [],
+  "passed": true,
+  "pack_integrity": {
+    "passed": true,
+    "voice": "zh-CN-XiaoxiaoNeural",
+    "clips": 29,
+    "bytes": 694800,
+    "offline_assets": true,
+    "http_checked": true
+  },
+  "layouts_checked": [
+    {
+      "width": 1920,
+      "height": 1080,
+      "passed": true
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "passed": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "passed": true
+    },
+    {
+      "width": 1024,
+      "height": 600,
+      "passed": true
+    }
+  ],
+  "live_state": {
+    "phase": "就绪",
+    "healthy": true,
+    "running": false,
+    "busy": false,
+    "fresh_slam_for_scene": true,
+    "task_mode": "exam"
+  },
+  "loaded_controller_matches_disk": true,
+  "usb_connected": false,
+  "usb_runtime_verified": false
+}

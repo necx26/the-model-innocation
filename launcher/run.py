@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 import urllib.request
+from graphics import container_graphics
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'.runtime';LOG=ROOT/'logs'
@@ -103,7 +104,17 @@ def is_running(dc):
 
 
 def runtime(dc):
-    if is_running(dc):return
+    graphics_args,graphics=container_graphics(ENV.get('YZBOT_RENDERER')=='software')
+    (LOG/'graphics-config.json').write_text(json.dumps(graphics,indent=2))
+    if is_running(dc):
+        current=output(dc+['inspect','-f','{{index .Config.Labels "yzbot.graphics"}}',NAME])[1]
+        if current==graphics['signature']:return
+        print('更新本工程显卡接入，停止旧渲染实例…',flush=True)
+        subprocess.run(dc+['exec',NAME,'bash','/opt/yzbot/native/stop.sh'],env=ENV,check=True)
+        run(dc+['stop',NAME],stdout=subprocess.DEVNULL)
+        backup=NAME+'-graphics-backup-'+str(time.time_ns())
+        run(dc+['rename',NAME,backup],stdout=subprocess.DEVNULL)
+        (STATE/'graphics-migration.json').write_text(json.dumps(dict(backup=backup,new_signature=graphics['signature'])))
     subprocess.run(dc+['rm','-f',NAME],env=ENV,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
     display=ENV.get('DISPLAY')
     if not display:raise RuntimeError('请在当前 Linux 图形桌面的终端启动，缺少 DISPLAY。')
@@ -117,7 +128,8 @@ def runtime(dc):
     args=dc+['run','-d','--name',NAME,'--init','--network','host','--ipc','host',
         '--user',f'{os.getuid()}:{os.getgid()}',
         '-e','HOME=/opt/yzbot/.runtime/container-home','-e','DISPLAY='+display,
-        '-e','XAUTHORITY=/tmp/yzbot.xauth','-e','LIBGL_ALWAYS_SOFTWARE=1',
+        '-e','XAUTHORITY=/tmp/yzbot.xauth',
+        '--label','yzbot.graphics='+graphics['signature'],*graphics_args,
         '-e','YZBOT_DOMAIN_ID='+ENV.get('YZBOT_DOMAIN_ID','91'),
         '-e','YZBOT_TASK_MODE='+ENV.get('YZBOT_TASK_MODE','exam'),
         '-e','YZBOT_OFFICIAL_ADAPTER='+ENV.get('YZBOT_OFFICIAL_ADAPTER','qwen_exam_adapter:solve_task'),

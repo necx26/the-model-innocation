@@ -50,3 +50,7 @@ add_executable(competition_rviz competition_rviz.cpp)
 target_compile_features(competition_rviz PRIVATE cxx_std_17)
 ament_target_dependencies(competition_rviz rviz_common rviz_rendering rclcpp)
 target_link_libraries(competition_rviz Qt5::Widgets)
+
+add_library(competition_display SHARED competition_display.cpp)
+target_compile_features(competition_display PRIVATE cxx_std_17)
+target_link_libraries(competition_display ${GAZEBO_LIBRARIES} Qt5::Widgets gazebo_gui)

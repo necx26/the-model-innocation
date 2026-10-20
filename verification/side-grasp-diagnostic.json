@@ -1,0 +1,409 @@
+{
+  "purpose": "Gazebo-only side grasp diagnostic. Stop the HTTP manager first, then reset.\n\nFixture setup uses a simulator cube pose only to position the robot before\nobservation. All target coordinates supplied to approach/pick come from camera\nframes. This diagnostic is not a timed competition acceptance run.\n",
+  "records": [
+    {
+      "direction": "left",
+      "camera_frames": 4,
+      "target_source": "camera",
+      "frame_timestamps": [
+        [
+          2724,
+          810000000
+        ],
+        [
+          2724,
+          892000000
+        ],
+        [
+          2724,
+          977000000
+        ],
+        [
+          2725,
+          137000000
+        ]
+      ],
+      "base_before": [
+        6.489577639175235,
+        -2.3988111243251615,
+        -1.3834641178686582
+      ],
+      "base_after": [
+        6.489559482056712,
+        -2.3987044032332294,
+        -1.3830125039759182
+      ],
+      "base_translation": 0.00010825466463969449,
+      "base_yaw_change": 0.00045161389274017694,
+      "held_model": "blue_cube_3",
+      "lifted_z": 0.14487043371840722,
+      "seconds": 6.365520359999209,
+      "metrics": [
+        {
+          "label": "open",
+          "total_seconds": 0.2289
+        },
+        {
+          "label": "pick_reach_descent",
+          "segments": 2,
+          "plan_seconds": 0.0631,
+          "trajectory_seconds": 2.5975,
+          "total_seconds": 2.7253,
+          "final_joint_error": 0.00189
+        },
+        {
+          "label": "close",
+          "total_seconds": 0.2856
+        },
+        {
+          "label": "arm",
+          "segments": 1,
+          "plan_seconds": 0.0318,
+          "trajectory_seconds": 1.2531,
+          "total_seconds": 1.3411,
+          "final_joint_error": 0.00165
+        }
+      ],
+      "events": [
+        {
+          "time": 0.0,
+          "text": "动态障碍速度决策",
+          "decision": "巡航/安全通行",
+          "speed_limit_mps": 2.0,
+          "front_range_m": 15.84,
+          "bumper_clearance_m": 15.538,
+          "external_closing_mps": 0.0
+        },
+        {
+          "time": 0.0,
+          "text": "相机已发现 blue #899，直达近处抓取位"
+        },
+        {
+          "time": 0.0,
+          "text": "目标进入机械臂工作区，保持底盘姿态",
+          "target_id": 899
+        },
+        {
+          "time": 0.0,
+          "text": "抓取位等待相机新帧",
+          "target_id": 899
+        },
+        {
+          "time": 0.0,
+          "text": "抵近图像未通过识别筛选",
+          "target_id": 899,
+          "color": "blue",
+          "pixel_candidates": [],
+          "camera_age": 0.058
+        },
+        {
+          "time": 0.0,
+          "text": "近处视野暂时遮挡，沿用已确认相机定位",
+          "target_id": 899,
+          "camera_hits": 4
+        },
+        {
+          "time": 0.0,
+          "text": "保持安全间距，机械臂直接抓取",
+          "base_target_gap_m": 0.315,
+          "relative_bearing": 1.382
+        },
+        {
+          "time": 0.0,
+          "text": "相机抵近确认目标",
+          "target_id": 899,
+          "model": "blue_cube_3",
+          "detection": {
+            "color": "blue",
+            "x": 6.8042956223508,
+            "y": -2.3991977732872254,
+            "z": 0.025,
+            "source": "confirmed_camera_memory"
+          },
+          "grasp_pose": [
+            6.489567003147775,
+            -2.3987723031451402,
+            -1.3832494285034918
+          ]
+        },
+        {
+          "time": 0.0,
+          "text": "机械臂正在抓取 blue_cube_3"
+        },
+        {
+          "time": 0.0,
+          "text": "复用当前停稳姿态的抓取预检，连续执行"
+        },
+        {
+          "time": 0.0,
+          "text": "手腕按方块边缘对齐，车身无需额外转向",
+          "world_gripper_yaw": -1.571
+        },
+        {
+          "time": 0.0,
+          "text": "抓取并抬升确认",
+          "model": "blue_cube_3",
+          "contact_distance": 0.07554405757886591,
+          "z": 0.14487043371840722
+        }
+      ],
+      "passed": true
+    },
+    {
+      "direction": "right",
+      "camera_frames": 4,
+      "target_source": "camera",
+      "frame_timestamps": [
+        [
+          2738,
+          879000000
+        ],
+        [
+          2738,
+          983000000
+        ],
+        [
+          2739,
+          218000000
+        ],
+        [
+          2739,
+          308000000
+        ]
+      ],
+      "base_before": [
+        6.489834901133327,
+        -2.400196584583334,
+        1.383497146858192
+      ],
+      "base_after": [
+        6.489762209531139,
+        -2.4004181041746007,
+        1.3822753930852432
+      ],
+      "base_translation": 0.00023314158432948887,
+      "base_yaw_change": 0.0012217537729490857,
+      "held_model": "blue_cube_3",
+      "lifted_z": 0.14533142895436943,
+      "seconds": 6.470690150003065,
+      "metrics": [
+        {
+          "label": "open",
+          "total_seconds": 0.2289
+        },
+        {
+          "label": "pick_reach_descent",
+          "segments": 2,
+          "plan_seconds": 0.0631,
+          "trajectory_seconds": 2.5975,
+          "total_seconds": 2.7253,
+          "final_joint_error": 0.00189
+        },
+        {
+          "label": "close",
+          "total_seconds": 0.2856
+        },
+        {
+          "label": "arm",
+          "segments": 1,
+          "plan_seconds": 0.0318,
+          "trajectory_seconds": 1.2531,
+          "total_seconds": 1.3411,
+          "final_joint_error": 0.00165
+        },
+        {
+          "label": "open",
+          "total_seconds": 0.3029
+        },
+        {
+          "label": "arm",
+          "segments": 1,
+          "plan_seconds": 0.034,
+          "trajectory_seconds": 1.8163,
+          "total_seconds": 1.8866,
+          "final_joint_error": 0.0013
+        },
+        {
+          "label": "open",
+          "total_seconds": 0.2287
+        },
+        {
+          "label": "pick_reach_descent",
+          "segments": 2,
+          "plan_seconds": 0.0634,
+          "trajectory_seconds": 2.612,
+          "total_seconds": 2.7234,
+          "final_joint_error": 0.00181
+        },
+        {
+          "label": "close",
+          "total_seconds": 0.304
+        },
+        {
+          "label": "arm",
+          "segments": 1,
+          "plan_seconds": 0.0319,
+          "trajectory_seconds": 1.2574,
+          "total_seconds": 1.3609,
+          "final_joint_error": 0.00194
+        }
+      ],
+      "events": [
+        {
+          "time": 0.0,
+          "text": "动态障碍速度决策",
+          "decision": "巡航/安全通行",
+          "speed_limit_mps": 2.0,
+          "front_range_m": 15.84,
+          "bumper_clearance_m": 15.538,
+          "external_closing_mps": 0.0
+        },
+        {
+          "time": 0.0,
+          "text": "相机已发现 blue #899，直达近处抓取位"
+        },
+        {
+          "time": 0.0,
+          "text": "目标进入机械臂工作区，保持底盘姿态",
+          "target_id": 899
+        },
+        {
+          "time": 0.0,
+          "text": "抓取位等待相机新帧",
+          "target_id": 899
+        },
+        {
+          "time": 0.0,
+          "text": "抵近图像未通过识别筛选",
+          "target_id": 899,
+          "color": "blue",
+          "pixel_candidates": [],
+          "camera_age": 0.058
+        },
+        {
+          "time": 0.0,
+          "text": "近处视野暂时遮挡，沿用已确认相机定位",
+          "target_id": 899,
+          "camera_hits": 4
+        },
+        {
+          "time": 0.0,
+          "text": "保持安全间距，机械臂直接抓取",
+          "base_target_gap_m": 0.315,
+          "relative_bearing": 1.382
+        },
+        {
+          "time": 0.0,
+          "text": "相机抵近确认目标",
+          "target_id": 899,
+          "model": "blue_cube_3",
+          "detection": {
+            "color": "blue",
+            "x": 6.8042956223508,
+            "y": -2.3991977732872254,
+            "z": 0.025,
+            "source": "confirmed_camera_memory"
+          },
+          "grasp_pose": [
+            6.489567003147775,
+            -2.3987723031451402,
+            -1.3832494285034918
+          ]
+        },
+        {
+          "time": 0.0,
+          "text": "机械臂正在抓取 blue_cube_3"
+        },
+        {
+          "time": 0.0,
+          "text": "复用当前停稳姿态的抓取预检，连续执行"
+        },
+        {
+          "time": 0.0,
+          "text": "手腕按方块边缘对齐，车身无需额外转向",
+          "world_gripper_yaw": -1.571
+        },
+        {
+          "time": 0.0,
+          "text": "抓取并抬升确认",
+          "model": "blue_cube_3",
+          "contact_distance": 0.07554405757886591,
+          "z": 0.14487043371840722
+        },
+        {
+          "time": 0.0,
+          "text": "相机已发现 blue #901，直达近处抓取位"
+        },
+        {
+          "time": 0.0,
+          "text": "目标进入机械臂工作区，保持底盘姿态",
+          "target_id": 901
+        },
+        {
+          "time": 0.0,
+          "text": "抓取位等待相机新帧",
+          "target_id": 901
+        },
+        {
+          "time": 0.0,
+          "text": "抵近图像未通过识别筛选",
+          "target_id": 901,
+          "color": "blue",
+          "pixel_candidates": [],
+          "camera_age": 0.049
+        },
+        {
+          "time": 0.0,
+          "text": "近处视野暂时遮挡，沿用已确认相机定位",
+          "target_id": 901,
+          "camera_hits": 4
+        },
+        {
+          "time": 0.0,
+          "text": "保持安全间距，机械臂直接抓取",
+          "base_target_gap_m": 0.315,
+          "relative_bearing": -1.379
+        },
+        {
+          "time": 0.0,
+          "text": "相机抵近确认目标",
+          "target_id": 901,
+          "model": "blue_cube_3",
+          "detection": {
+            "color": "blue",
+            "x": 6.804319578603434,
+            "y": -2.399158194608165,
+            "z": 0.025,
+            "source": "confirmed_camera_memory"
+          },
+          "grasp_pose": [
+            6.489793951711133,
+            -2.4003072619497874,
+            1.3830471975604888
+          ]
+        },
+        {
+          "time": 0.0,
+          "text": "机械臂正在抓取 blue_cube_3"
+        },
+        {
+          "time": 0.0,
+          "text": "复用当前停稳姿态的抓取预检，连续执行"
+        },
+        {
+          "time": 0.0,
+          "text": "手腕按方块边缘对齐，车身无需额外转向",
+          "world_gripper_yaw": 1.571
+        },
+        {
+          "time": 0.0,
+          "text": "抓取并抬升确认",
+          "model": "blue_cube_3",
+          "contact_distance": 0.07517863865589847,
+          "z": 0.14533142895436943
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

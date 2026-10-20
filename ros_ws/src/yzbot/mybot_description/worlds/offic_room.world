@@ -1788,6 +1788,9 @@
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
+      <plugin name="competition_display" filename="libcompetition_display.so">
+        <fps>60</fps>
+      </plugin>
     </gui>
     <model name="Untitled">
       <link name="link_0">
@@ -3757,7 +3760,7 @@
       <link name="camera_link">
         <sensor name="overview_sensor" type="camera">
           <always_on>true</always_on>
-          <update_rate>15</update_rate>
+          <update_rate>60</update_rate>
           <camera name="overview">
             <horizontal_fov>1.5708</horizontal_fov>
             <image>
@@ -3791,7 +3794,7 @@
       <link name="camera_link">
         <sensor name="oblique_sensor" type="camera">
           <always_on>true</always_on>
-          <update_rate>15</update_rate>
+          <update_rate>60</update_rate>
           <camera name="oblique">
             <horizontal_fov>2.0</horizontal_fov>
             <image>
@@ -3972,10 +3975,10 @@
           </geometry>
         </visual>
       </link>
-      <pose>-1.5 -10.4 0.005 0 0 1.57079632679</pose>
+      <pose>-1.5 -8.4 0.005 0 0 1.5707963267948966</pose>
       <plugin name="competition_patrol" filename="libcompetition_patrol.so">
-        <start>-1.5 -10.4 0.005</start>
-        <end>-1.5 -8.0 0.005</end>
+        <start>-1.5 -8.4 0.005</start>
+        <end>-1.5 -6.0 0.005</end>
         <period>28.0</period>
       </plugin>
       <static>true</static>
@@ -4200,7 +4203,7 @@
           </geometry>
         </visual>
       </link>
-      <pose>11.5 -5.2 0.005 0 0 1.57079632679</pose>
+      <pose>11.5 -5.2 0.005 0 0 0.0</pose>
       <plugin name="competition_patrol" filename="libcompetition_patrol.so">
         <start>11.5 -5.2 0.005</start>
         <end>13.9 -5.2 0.005</end>

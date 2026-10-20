@@ -13,12 +13,15 @@ from scene_config import SCENE, ZONES, PATROLS
 
 def apply_world():
     path = ROOT/'ros_ws/src/yzbot/mybot_description/worlds'/SCENE.get('terrain_world', 'competition.world')
+    from patrol_safety import patrol_reports
+    patrol_reports(PATROLS,path)
     tree = ET.parse(path); world = tree.getroot().find('world')
     models = {m.get('name'): m for m in world.findall('model')}
     # Encode in Gazebo's process, before DDS: do not transfer 691 KB raw frames
     # through the USB OS's small default UDP receive buffers.
     for view in ('overview', 'oblique'):
         sensor = models['competition_camera_'+view].find('link/sensor')
+        sensor.find('update_rate').text=str(SCENE.get('fixed_camera',{}).get('fps',30))
         plugin = sensor.find("plugin[@name='"+view+"_compressed_camera']")
         if plugin is None:
             plugin = ET.SubElement(sensor, 'plugin', name=view+'_compressed_camera',
@@ -26,6 +29,13 @@ def apply_world():
             ET.SubElement(plugin, 'topic_name').text='/fixed_'+view+'/image_raw/compressed'
             ET.SubElement(plugin, 'frame_name').text='fixed_'+view+'_camera'
     world.find("plugin[@name='competition_link_attacher']").set('filename','libgazebo_link_attacher.so')
+    gui=world.find('gui')
+    display=gui.find("plugin[@name='competition_display']")
+    if display is None:display=ET.SubElement(gui,'plugin',name='competition_display',filename='libcompetition_display.so')
+    rate=display.find('fps')
+    if rate is None:rate=ET.SubElement(display,'fps')
+    rate.text=str(SCENE.get('display',{}).get('gazebo_fps',60))
+
     # Spawn the competition scene before the controller completes readiness.
     # Runtime search never reads this scene-generation data.
     from mission_strategy import MissionMap
@@ -43,7 +53,8 @@ def apply_world():
         for key in ('start','end'):
             plugin.find(key).text = ' '.join(map(str,patrol[key]))
         plugin.find('period').text = str(patrol['period'])
-        model.find('pose').text = ' '.join(map(str,patrol['start']))+' 0 0 1.57079632679'
+        yaw=math.atan2(patrol['end'][1]-patrol['start'][1],patrol['end'][0]-patrol['start'][0])
+        model.find('pose').text = ' '.join(map(str,patrol['start']))+f' 0 0 {yaw}'
         old = model.find("link[@name='picture_placard']")
         if old is not None: model.remove(old)
         # Native car body/wheels remain unchanged. The board is carried by it.
@@ -62,6 +73,11 @@ def apply_world():
         </link>'''))
     ET.indent(tree, space='  ')
     tree.write(path, encoding='utf-8', xml_declaration=True)
+    camera_path=ROOT/'ros_ws/src/yzbot/mybot_description/urdf/camera_gazebo.xacro'
+    import re
+    camera=camera_path.read_text()
+    camera=re.sub(r'<update_rate>[^<]+</update_rate>',f"<update_rate>{SCENE['front_camera']['fps']}</update_rate>",camera,count=1)
+    camera_path.write_text(camera)
     print('Updated world:',path)
 
 

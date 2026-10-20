@@ -18,12 +18,12 @@
       "model": "Move1",
       "start": [
         -1.5,
-        -10.4,
+        -8.4,
         0.005
       ],
       "end": [
         -1.5,
-        -8.0,
+        -6.0,
         0.005
       ],
       "period": 28.0
@@ -64,8 +64,15 @@
   "front_camera": {
     "width": 960,
     "height": 540,
-    "fps": 10,
+    "fps": 60,
     "max_detection_range_m": 5.0,
     "coverage_radius_m": 3.5
+  },
+  "display": {
+    "gazebo_fps": 60,
+    "web_camera_fps": 60
+  },
+  "fixed_camera": {
+    "fps": 60
   }
 }

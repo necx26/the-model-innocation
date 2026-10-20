@@ -1,0 +1,28 @@
+{
+  "synchronized_at": "2026-10-20 19:51:58 +0800",
+  "source": "/home/necx/机器人比赛个人版",
+  "destination": "/media/necx/f353211b-2e85-493d-ae8f-0a0003ce5efb/home/ros/桌面/机器人比赛个人版",
+  "source_mirror_passed": true,
+  "mode": "overwrite source files only; no delete",
+  "outside_project_modified": false,
+  "usb_runtime_preserved": true,
+  "usb_run_mode": {
+    "mode": "native"
+  },
+  "fps": {
+    "gazebo": 60,
+    "front_config": 60,
+    "fixed_config": 60,
+    "web_config": 60,
+    "competition_camera_overview": 60,
+    "competition_camera_oblique": 60
+  },
+  "front_xacro_fps": [
+    60
+  ],
+  "voice_pack_passed": true,
+  "old_english_entry_disabled": true,
+  "native_rebuild_required": true,
+  "desktop_adapted_to": "/home/ros/桌面/机器人比赛个人版",
+  "usb_boot_runtime_verified": false
+}

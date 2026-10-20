@@ -1,0 +1,88 @@
+{
+  "cause": "Kinematic SetWorldPose ignores collision response; Move1 crosses Wall_81 in the actual saved-state terrain pose",
+  "shift_m": [
+    0,
+    2,
+    0
+  ],
+  "before": [
+    {
+      "model": "Move1",
+      "start": [
+        -1.5,
+        -10.4,
+        0.005
+      ],
+      "end": [
+        -1.5,
+        -8.0,
+        0.005
+      ],
+      "length_m": 2.4000000000000004,
+      "nearest_wall": "/officeroom/Wall_81",
+      "minimum_centre_wall_m": 0.0,
+      "minimum_car_wall_margin_m": 0.0,
+      "required_margin_m": 0.04,
+      "passed": false
+    },
+    {
+      "model": "Move2",
+      "start": [
+        11.5,
+        -5.2,
+        0.005
+      ],
+      "end": [
+        13.9,
+        -5.2,
+        0.005
+      ],
+      "length_m": 2.4000000000000004,
+      "nearest_wall": "/officeroom/Wall_72",
+      "minimum_centre_wall_m": 1.5173581442917854,
+      "minimum_car_wall_margin_m": 1.3023581442917853,
+      "required_margin_m": 0.04,
+      "passed": true
+    }
+  ],
+  "after": [
+    {
+      "model": "Move1",
+      "start": [
+        -1.5,
+        -8.4,
+        0.005
+      ],
+      "end": [
+        -1.5,
+        -6.0,
+        0.005
+      ],
+      "length_m": 2.4000000000000004,
+      "nearest_wall": "/officeroom/Wall_81",
+      "minimum_centre_wall_m": 0.9241269505607423,
+      "minimum_car_wall_margin_m": 0.6694026092089591,
+      "required_margin_m": 0.04,
+      "passed": true
+    },
+    {
+      "model": "Move2",
+      "start": [
+        11.5,
+        -5.2,
+        0.005
+      ],
+      "end": [
+        13.9,
+        -5.2,
+        0.005
+      ],
+      "length_m": 2.4000000000000004,
+      "nearest_wall": "/officeroom/Wall_72",
+      "minimum_centre_wall_m": 1.5173581442917854,
+      "minimum_car_wall_margin_m": 1.3023581442917853,
+      "required_margin_m": 0.04,
+      "passed": true
+    }
+  ]
+}

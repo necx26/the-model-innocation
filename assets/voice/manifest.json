@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "language": "zh-CN",
+  "gender": "female",
+  "voice": "zh-CN-XiaoxiaoNeural",
+  "runtime": "offline audio playback; no model or TTS service required",
+  "delivery": "温柔轻快；语句、标点、语速与音高调整；不使用情感风格 SSML 标签",
+  "generator": "edge-tts 7.3.1",
+  "source": "https://github.com/rany2/edge-tts",
+  "clips": {
+    "enabled": {
+      "file": "enabled.mp3",
+      "text": "中文女声已开启。准备好啦，我们一起完成搬运任务吧！",
+      "recipe": "aa07a2f2eb44683eb30258f4aa3e93ab7d7cac372fca70108c665ece8ffc3d86",
+      "bytes": 31536,
+      "sha256": "3330778f5009d51abaa6cd1236433e9a72c7ab9f515f256e19011d3f16d71679"
+    },
+    "ready": {
+      "file": "ready.mp3",
+      "text": "机器人准备好啦，可以开始考试了。",
+      "recipe": "d8f902a18079c355415187e9b6b7cadc4e9643c8659dd6e7c92c0f5ba430ee48",
+      "bytes": 20160,
+      "sha256": "07226c5309152721c1ff5b1f6bd3930a357ec8ce35338b9cfeb758c4d14a3c90"
+    },
+    "solve": {
+      "file": "solve.mp3",
+      "text": "收到题目啦！正在分析搬运要求，请稍等一下。",
+      "recipe": "a0b2a0677b5c61135f0394cc79ae4c138c955037975fba1ad473abfa7c0549c7",
+      "bytes": 29520,
+      "sha256": "1ca5d9bb2722443cfdafaef9025b0a52973c806717c3f277418364ff939975fe"
+    },
+    "search": {
+      "file": "search.mp3",
+      "text": "我来看看，下一个目标在哪里。",
+      "recipe": "7a2663cbe25d9bd7a6cd0745db6c90f94d7da4f6d863765ef0f1b02a8f67f767",
+      "bytes": 18000,
+      "sha256": "df5950bcf1f12282b3e087d139809fe7b94b6cdda005592f005e7191037da9ea"
+    },
+    "approach": {
+      "file": "approach.mp3",
+      "text": "找到目标啦！现在靠近，准备抓取。",
+      "recipe": "1f490d07c8620dc8dec2e03ba26b70e6da9dfb57af3e1eb0a3aba46589005b1c",
+      "bytes": 24768,
+      "sha256": "1583e5f4f43d603178a469e2e66215e1b21e09aeeb752ebbf5c20d627370f826"
+    },
+    "approach_blocked": {
+      "file": "approach_blocked.mp3",
+      "text": "前方有障碍，我来换一条安全的路线。",
+      "recipe": "3a7fe51bb2281b14cdb0ec01fdf8cfd139aa8832c0b9ff0a06451563b1e39116",
+      "bytes": 21168,
+      "sha256": "94650f0f95c4c6321b88f341b4d7b4f9c4a842d608e159835eea5fb1c6618167"
+    },
+    "grasp_red": {
+      "file": "grasp_red.mp3",
+      "text": "准备抓取红色物体，稳稳拿好再出发。",
+      "recipe": "a4598461178a1fcc7d792ff5715323b533f66cb25b01a51a32a15ea22b4a330c",
+      "bytes": 22608,
+      "sha256": "90866462ce66e21a5695caf9afc5fe4419ab26abb7aff332a7b9699e90966bf5"
+    },
+    "grasp_blue": {
+      "file": "grasp_blue.mp3",
+      "text": "准备抓取蓝色物体，稳稳拿好再出发。",
+      "recipe": "347b6a94592db3951c88dd9960d2f30de765ae7787e3f3d3de48d951d9f89031",
+      "bytes": 22320,
+      "sha256": "caf1120997f3ea5efb360f1247c576cfb8f07024eaa8b7b9e8698bed2d412608"
+    },
+    "grasp_target": {
+      "file": "grasp_target.mp3",
+      "text": "准备抓取目标物体，稳稳拿好再出发。",
+      "recipe": "c6852c9c6fb994258d98751a94243e47cfa884871ee2824da5f6dbcf51894c05",
+      "bytes": 22464,
+      "sha256": "baa0319d44da7347cf3f3a78c8c06ac5e41ee991292dda33e6d676b49babb445"
+    },
+    "carry_red": {
+      "file": "carry_red.mp3",
+      "text": "红色物体抓稳啦！现在送往指定区域。",
+      "recipe": "50fd23ba587018b285ad6f5c02c9c1565151678fd6ca1ab77628bb3ae609b24e",
+      "bytes": 25344,
+      "sha256": "a7a930655f66c483aa4be69afbb8a605118dd2c351c0e6207b15afb25ad3ad32"
+    },
+    "carry_blue": {
+      "file": "carry_blue.mp3",
+      "text": "蓝色物体抓稳啦！现在送往指定区域。",
+      "recipe": "d2bbc858e3f176fde476f6a62bfbf27ca0da049272fb1c67b3d3dae2fb306134",
+      "bytes": 25344,
+      "sha256": "2c39869caf50149b8bb8961ef984ffdb7f7abd29da81f0dbbfa1b06e16a68aa6"
+    },
+    "carry_target": {
+      "file": "carry_target.mp3",
+      "text": "物体抓稳啦！现在送往指定区域。",
+      "recipe": "f532abd5386b451999b1a183269e9569375396e15c0f802d694d5d53d8fcb136",
+      "bytes": 23328,
+      "sha256": "ce0964e332e517a0db5e4ef6bb689025200902e9f8fe07b5382d63e4f5a23b77"
+    },
+    "place": {
+      "file": "place.mp3",
+      "text": "到达放置区啦！轻轻放好，再后退离开。",
+      "recipe": "7ff2438de8b7d4e7567a3fe9cacee37606626012d0e94b658ae9a90b2055c5c5",
+      "bytes": 27072,
+      "sha256": "234334f2db41fd3f45255ec2ac6451360a5aa019d0eae3f94fdf2201b071b16a"
+    },
+    "complete": {
+      "file": "complete.mp3",
+      "text": "太棒啦！搬运任务完成，结果已经核验完毕！",
+      "recipe": "2d1fe4294d510a47b860647c95f54f23e1f449dbf17a6dbb022274e13d349893",
+      "bytes": 28800,
+      "sha256": "758aec2a716b03bb1122be5a5fc4e72736eeb9450f011c5830b05b7ca7f52916"
+    },
+    "incomplete": {
+      "file": "incomplete.mp3",
+      "text": "本轮任务还没有完成，请查看界面上的具体原因。",
+      "recipe": "d1357decea87164be78e1347e1b1c3850d6681226835721e2c1d28045f3d3a9b",
+      "bytes": 27936,
+      "sha256": "90e0a2ec60137ff1247087af419d320f9de37e0cac754183ec2ff4d2a1b59e44"
+    },
+    "stopped": {
+      "file": "stopped.mp3",
+      "text": "作业已停止。需要重新开始时，请先重置场景。",
+      "recipe": "b99d901b2fb777f98f7730c40985c729ef8da613ef99b7a85f9a91c7e23e5049",
+      "bytes": 31104,
+      "sha256": "b530800a60ee08e7e9233672b30da4d5fefbbfc9d100598aa063b6d4dd998bb0"
+    },
+    "prepare": {
+      "file": "prepare.mp3",
+      "text": "正在准备场景和导航，马上就好。",
+      "recipe": "e63c47800d3b011ce1aedfd07cc1a7d4c35f2eeb270cee966be9f20fd5cd0902",
+      "bytes": 20304,
+      "sha256": "ab1ad95cf92383799fa157f4e25e21411ff8cb5f739902e6a64a2a0cef309e06"
+    },
+    "reset_failed": {
+      "file": "reset_failed.mp3",
+      "text": "场景还没有准备好，请查看界面提示。",
+      "recipe": "51366262860ab84b56d0f5aa1af29c4aca6f12a42bcc128e7c0046a8ad12103b",
+      "bytes": 22896,
+      "sha256": "fde81e1308060c2c9f83199414da3ea86c0c63ce4b8641895a60227f30292a30"
+    },
+    "waiting": {
+      "file": "waiting.mp3",
+      "text": "等待下一步任务。",
+      "recipe": "8545eabfa891352213379f934f45051ed856986af44ef2278a6e93fd51017ac2",
+      "bytes": 11376,
+      "sha256": "42ea0864ebf379daef0ac331161f45ee9ae9c83fcdd6bd7feb262b7c25a993dd"
+    },
+    "disconnected": {
+      "file": "disconnected.mp3",
+      "text": "机器人连接中断啦，请检查仿真运行状态。",
+      "recipe": "2cfa29bcac8e45ceda9b58824dc2452c168abe6aef582b7f0021ae280a3c1c90",
+      "bytes": 25776,
+      "sha256": "95a942e88d22065ef89bd2255652ff3b1c2b981493138b20cb0b379fddffaa66"
+    },
+    "carry_red_a": {
+      "file": "carry_red_a.mp3",
+      "text": "红色物体抓稳啦！现在送往 A 区。",
+      "recipe": "b6fda4ac0c8c50bc76927a3b8c1c96f20bd660a70554eb33c96824c665bbc29d",
+      "bytes": 23760,
+      "sha256": "e89455fe1cf0e06e7656062754af5de7e1ad2bded92970ce445d15c4536e76dc"
+    },
+    "carry_red_b": {
+      "file": "carry_red_b.mp3",
+      "text": "红色物体抓稳啦！现在送往 B 区。",
+      "recipe": "8d945976fee4bed410eff73f9d7049ea682833751ba97627ec593bf48ec1a827",
+      "bytes": 23616,
+      "sha256": "b466ec3936e7b76a68350c6fc19739c884a4143f206f63f1201d17307c33d418"
+    },
+    "carry_red_c": {
+      "file": "carry_red_c.mp3",
+      "text": "红色物体抓稳啦！现在送往 C 区。",
+      "recipe": "624301a961bba18eae7d214722a503b8edccf79bde3a90e440e231c43c86c744",
+      "bytes": 23760,
+      "sha256": "8c4e5510847c22e44ad5474365bdc994ed403e4e15e7e5152aa4dfa6a2c6285d"
+    },
+    "carry_blue_a": {
+      "file": "carry_blue_a.mp3",
+      "text": "蓝色物体抓稳啦！现在送往 A 区。",
+      "recipe": "5032a0951b80f2a0b8bae326954254d4c7c782271ee1705d87b9689042b97faa",
+      "bytes": 23904,
+      "sha256": "e28c934a17479bb18efb3b7c844c183fbc2be99d09d1759782caa08d404d4fae"
+    },
+    "carry_blue_b": {
+      "file": "carry_blue_b.mp3",
+      "text": "蓝色物体抓稳啦！现在送往 B 区。",
+      "recipe": "1351bd95bd986a3a47dc0793c6ddc554d2dcc765b7a1465879be654eb42b5bb0",
+      "bytes": 23760,
+      "sha256": "edffb02ba7c7cdc93d36d927c4f80077e2a99979cbaf3c3cfb2e746420ea1cc2"
+    },
+    "carry_blue_c": {
+      "file": "carry_blue_c.mp3",
+      "text": "蓝色物体抓稳啦！现在送往 C 区。",
+      "recipe": "f4ace5305bf0b53fe5cabc8bdb864f10de2897df284e4fb37fff1d1add01470d",
+      "bytes": 23904,
+      "sha256": "2925022ae13e5e47d0e9fb98fb63fd7908b43df01696d59c450369ca808448a6"
+    },
+    "carry_target_a": {
+      "file": "carry_target_a.mp3",
+      "text": "目标物体抓稳啦！现在送往 A 区。",
+      "recipe": "a999e1e03b4309134c6e9fb7b51e24ce335ec9a8dc88e722c05d1f7382880b0b",
+      "bytes": 23472,
+      "sha256": "a92314470a6ba6c73066bf298d06d4c144be1f32b32d6c82b8bad5447bae853f"
+    },
+    "carry_target_b": {
+      "file": "carry_target_b.mp3",
+      "text": "目标物体抓稳啦！现在送往 B 区。",
+      "recipe": "a6c0bf38ffd60823a2c6e7ec3696ae0f5e0bee6d5d25febac16444f221a2b3a9",
+      "bytes": 23328,
+      "sha256": "53f53ebb1a387e9d5a3f0db13c3d02c1fec61f436c0098863612d3f45a63b942"
+    },
+    "carry_target_c": {
+      "file": "carry_target_c.mp3",
+      "text": "目标物体抓稳啦！现在送往 C 区。",
+      "recipe": "ed354bb1dcdf91739b340d26de058d2bafc37b67b5cff65dfea7c2017c1b38dc",
+      "bytes": 23472,
+      "sha256": "d992088e18fcf1bb7f808a78610a8096342f336c23423ec8e6fe0a4cc97591d4"
+    }
+  }
+}

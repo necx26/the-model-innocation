@@ -1,0 +1,97 @@
+{
+  "scope": "Real browser tabs with instrumented native speech API; no audible English generated",
+  "first": {
+    "enabled": true,
+    "playing": true,
+    "button": "true",
+    "hint": "正在播报 · 中文女声",
+    "native": {
+      "cancel": 3,
+      "speak": 0
+    },
+    "live": "off"
+  },
+  "afterSecond": {
+    "a": {
+      "enabled": false,
+      "playing": false,
+      "button": "false",
+      "hint": "另一比赛页面已接管语音",
+      "native": {
+        "cancel": 4,
+        "speak": 0
+      },
+      "live": "off"
+    },
+    "b": {
+      "enabled": true,
+      "playing": true,
+      "button": "true",
+      "hint": "正在播报 · 中文女声",
+      "native": {
+        "cancel": 3,
+        "speak": 0
+      },
+      "live": "off"
+    }
+  },
+  "afterReclaim": {
+    "a": {
+      "enabled": true,
+      "playing": true,
+      "button": "true",
+      "hint": "正在播报 · 中文女声",
+      "native": {
+        "cancel": 6,
+        "speak": 0
+      },
+      "live": "off"
+    },
+    "b": {
+      "enabled": false,
+      "playing": false,
+      "button": "false",
+      "hint": "另一比赛页面已接管语音",
+      "native": {
+        "cancel": 4,
+        "speak": 0
+      },
+      "live": "off"
+    }
+  },
+  "pendingCancelled": true,
+  "final": {
+    "a": {
+      "enabled": false,
+      "playing": false,
+      "button": "false",
+      "hint": "另一比赛页面已接管语音",
+      "native": {
+        "cancel": 8,
+        "speak": 0
+      },
+      "live": "off"
+    },
+    "b": {
+      "enabled": true,
+      "playing": true,
+      "button": "true",
+      "hint": "正在播报 · 中文女声",
+      "native": {
+        "cancel": 6,
+        "speak": 0
+      },
+      "live": "off"
+    }
+  },
+  "onlyChinese": true,
+  "passed": true,
+  "legacy_streams": {
+    "speech-dispatcher-espeak-ng": {
+      "muted": true
+    },
+    "speech-dispatcher-dummy": {
+      "muted": true
+    }
+  }
+}
