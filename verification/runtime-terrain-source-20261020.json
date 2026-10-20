@@ -1,0 +1,27 @@
+{
+  "source_world": {
+    "path": "ros_ws/src/yzbot/mybot_description/worlds/offic_room.world",
+    "sha256": "6d3b82f67a74f171961514ae217337de7969255e68238a0cbfdf0b3e33490547"
+  },
+  "installed_world": {
+    "path": "ros_ws/install/mybot_description/share/mybot_description/worlds/offic_room.world",
+    "sha256": "6d3b82f67a74f171961514ae217337de7969255e68238a0cbfdf0b3e33490547"
+  },
+  "provided_world": {
+    "path": "assets/terrain_v2/offic_room.world",
+    "sha256": "efad47cda9011a69420f3b3d6508d4f6cabc002a1670a7623acf701a94b292a5"
+  },
+  "provided_zip": {
+    "path": "assets/terrain_v2/v2.zip",
+    "sha256": "4bd6e3279a6d1cbcce58a2825018e3f2e0736365591624b9f3fc9147c99f8686"
+  },
+  "map_yaml": {
+    "path": "ros_ws/src/yzbot/bot_navigation/maps/map.yaml",
+    "sha256": "093295c1463395397d3953ddddf8218e2d78aa5738798965afcd8865c70e723c"
+  },
+  "map_image": {
+    "path": "ros_ws/src/yzbot/bot_navigation/maps/map.pgm",
+    "sha256": "895646aab27ef73e92c6b3fc82f2cf6ac55bf7ef1aaff1af84eabfd0a20a1c7d"
+  },
+  "installed_world_matches_source": true
+}

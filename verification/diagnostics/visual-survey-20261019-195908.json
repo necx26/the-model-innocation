@@ -1,0 +1,112 @@
+{
+  "purpose": "untimed visual survey, not competition acceptance",
+  "side": "east",
+  "views": [
+    {
+      "point": [
+        10.2,
+        -2.5
+      ],
+      "navigation_status": 4,
+      "seconds": 20.91
+    },
+    {
+      "point": [
+        10.2,
+        -6.9
+      ],
+      "navigation_status": 4,
+      "seconds": 54.84
+    },
+    {
+      "point": [
+        10.2,
+        -12.4
+      ],
+      "navigation_status": 4,
+      "seconds": 90.17
+    },
+    {
+      "point": [
+        10.2,
+        1.9
+      ],
+      "navigation_status": 4,
+      "seconds": 158.9
+    }
+  ],
+  "inventory_prior_plus_live": {
+    "red": 5,
+    "blue": 5
+  },
+  "elapsed": 161.16,
+  "camera_tracks": [
+    {
+      "id": 1,
+      "color": "blue",
+      "x": 6.719029902852098,
+      "y": -2.3915105907051015,
+      "hits": 84,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4251.798538704,
+      "retry_after": 0.0
+    },
+    {
+      "id": 2,
+      "color": "red",
+      "x": 9.198469278186401,
+      "y": -2.389219552729438,
+      "hits": 83,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4251.87072726,
+      "retry_after": 0.0
+    },
+    {
+      "id": 3,
+      "color": "blue",
+      "x": 5.517589303997525,
+      "y": -13.82643053163491,
+      "hits": 42,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4334.642767373,
+      "retry_after": 0.0
+    },
+    {
+      "id": 4,
+      "color": "red",
+      "x": -1.0242756628006653,
+      "y": -1.74758609519759,
+      "hits": 30,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4349.255719369,
+      "retry_after": 0.0
+    },
+    {
+      "id": 5,
+      "color": "blue",
+      "x": 4.9900759152521434,
+      "y": 3.0016699074242257,
+      "hits": 68,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4365.18882635,
+      "retry_after": 0.0
+    },
+    {
+      "id": 6,
+      "color": "blue",
+      "x": 10.393555310623126,
+      "y": 2.4074525403445226,
+      "hits": 78,
+      "status": "available",
+      "failures": 0,
+      "last_seen": 4378.017336383,
+      "retry_after": 0.0
+    }
+  ],
+  "learned": 6
+}

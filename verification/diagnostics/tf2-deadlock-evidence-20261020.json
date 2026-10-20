@@ -1,0 +1,18 @@
+{
+  "version": "0.25.23-1jammy.20260907.213559",
+  "upstream_issues": [
+    "https://github.com/ros2/geometry2/issues/992",
+    "https://github.com/ros2/geometry2/issues/995"
+  ],
+  "observed_threads": {
+    "TF_listener": "BufferCore::testTransformableRequests -> tf2_ros timer-map mutex",
+    "LaserScan": "Buffer::waitForTransform -> BufferCore::addTransformableRequest -> requests mutex"
+  },
+  "original_regression_exit": 124,
+  "patched_regression_exit": 0,
+  "loaded_library": "project .runtime/tf2-fix/libtf2.so",
+  "baseline_navigation_pose_age_max": {
+    "local": 1.034,
+    "global": 0.678
+  }
+}

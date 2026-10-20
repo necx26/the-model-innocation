@@ -14,7 +14,7 @@ while parent>1:
     own.add(parent)
     try:parent=int((Path('/proc')/str(parent)/'stat').read_text().split()[3])
     except (FileNotFoundError,ValueError):break
-for name in ['controller','foxglove','navigation','gazebo','qwen','viewer']:
+for name in ['rviz','controller','foxglove','navigation','gazebo','qwen','viewer']:
     f=root/(name+'.pid')
     if not f.exists():continue
     try:

@@ -1,0 +1,14 @@
+{
+  "source_directory_retired": "/home/necx/yzbot_ros2_run/competition/llm",
+  "local_test_resources": ".runtime/local-model",
+  "checksums": {
+    "libggml-cpu.so": "d1549530b330ec6ff10904b35980fcea0914d90e7189332cd7e106da2ab20d8a",
+    "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf": "1d9614638d18024d0fbb36575a15f1302a3adf044df10345688ec4f6e1c4ff32",
+    "libggml-base.so": "6317513e179db0c07f36d09dd7eca4548032e2d7214e5ce1654795e6c3c770c8",
+    "libllama.so": "43aa6bf26d7526b1fa3dae9387cad62962fe12e0ce6049edff5cf35903b15562",
+    "libmtmd.so": "4ff05c6781266b768d0372dc8aa9d8879dd0b9abe37d81df372da4b06cdeb781",
+    "libggml.so": "2d68a051d0e1e784c9549bbe71d9ac241f39e31c6baf420f3de0cc19fb424f5f",
+    "llama-server": "6baab72011ef42ac192f400582cbfed8e1f9375d75ab9a10f93ff76730c703d2"
+  },
+  "not_part_of_source_submission": true
+}

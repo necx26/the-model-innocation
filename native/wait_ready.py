@@ -5,9 +5,9 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 from rclpy.parameter import Parameter
 from rclpy.time import Time
-from rclpy.qos import qos_profile_sensor_data, QoSProfile, DurabilityPolicy
+from rclpy.qos import qos_profile_sensor_data, QoSProfile, DurabilityPolicy, ReliabilityPolicy
 from rosgraph_msgs.msg import Clock
-from sensor_msgs.msg import JointState, Image
+from sensor_msgs.msg import JointState, CompressedImage
 from nav_msgs.msg import OccupancyGrid
 from lifecycle_msgs.srv import GetState
 from control_msgs.action import FollowJointTrajectory
@@ -24,7 +24,13 @@ n.create_subscription(JointState,'/joint_states',lambda _:received('joints'),qos
 arm=ActionClient(n,FollowJointTrajectory,'/arm_controller/follow_joint_trajectory')
 if a.stage=='nav':
     tf=Buffer(node=n);listener=TransformListener(tf,n)
-    n.create_subscription(Image,'/camera/image_raw',lambda _:received('camera'),qos_profile_sensor_data)
+    camera_stamps=[]
+    def camera_received(msg):
+        received('camera')
+        stamp=(msg.header.stamp.sec,msg.header.stamp.nanosec)
+        if not camera_stamps or stamp!=camera_stamps[-1]:camera_stamps.append(stamp)
+        del camera_stamps[:-20]
+    camera_sub=n.create_subscription(CompressedImage,'/camera/image_raw/compressed',camera_received,QoSProfile(depth=1,reliability=ReliabilityPolicy.RELIABLE))
     n.create_subscription(OccupancyGrid,'/map',lambda _:received('map'),QoSProfile(depth=1,durability=DurabilityPolicy.TRANSIENT_LOCAL))
     clients={s:n.create_client(GetState,'/'+s+'/get_state') for s in ['bt_navigator','controller_server']};futures={}
     planner=n.create_client(GetMotionPlan,'/plan_kinematic_path')
@@ -42,6 +48,8 @@ def ready():
         missing.extend(name for name in clients if name not in seen)
         for name in ['camera','map']:
             if time.monotonic()-last.get(name,0)>5:missing.append(name)
+        if len(camera_stamps)<5:missing.append('continuous_camera_frames')
+        elif not any(tf.can_transform('odom','camera_link',Time(seconds=sec,nanoseconds=nsec)) for sec,nsec in camera_stamps[-10:]):missing.append('camera_timestamp_tf')
         if not planner.service_is_ready():missing.append('moveit_planner')
         for frame in ['odom','map']:
             try:

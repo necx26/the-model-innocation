@@ -1,0 +1,56 @@
+{
+  "purpose": "independent post-test audit only; no truth used to refine vision",
+  "question_source": "saved generator question replay (regression only)",
+  "elapsed": 260.0,
+  "grasp_attempts": 5,
+  "picked": 5,
+  "final_physical_checks": [
+    true,
+    true,
+    true,
+    true,
+    true
+  ],
+  "grasp_observations": [
+    {
+      "model": "blue_cube_3",
+      "vision_source": "camera_HSV_5cm_bbox_fit",
+      "bbox_fit_residual_px": 0.571,
+      "xy_error_m": 0.0053,
+      "lift_confirmed": true,
+      "contact_distance_m": 0.07642969814916582
+    },
+    {
+      "model": "red_cube_4",
+      "vision_source": "camera_HSV_5cm_bbox_fit",
+      "bbox_fit_residual_px": 0.534,
+      "xy_error_m": 0.0079,
+      "lift_confirmed": true,
+      "contact_distance_m": 0.07494675201754375
+    },
+    {
+      "model": "red_cube_5",
+      "vision_source": "camera_HSV_5cm_bbox_fit",
+      "bbox_fit_residual_px": 0.396,
+      "xy_error_m": 0.0061,
+      "lift_confirmed": true,
+      "contact_distance_m": 0.07603591622518147
+    },
+    {
+      "model": "red_cube_1",
+      "vision_source": "camera_HSV_5cm_bbox_fit",
+      "bbox_fit_residual_px": 0.62,
+      "xy_error_m": 0.0052,
+      "lift_confirmed": true,
+      "contact_distance_m": 0.0742461605007245
+    },
+    {
+      "model": "red_cube_2",
+      "vision_source": "camera_HSV_5cm_bbox_fit",
+      "bbox_fit_residual_px": 0.722,
+      "xy_error_m": 0.0058,
+      "lift_confirmed": true,
+      "contact_distance_m": 0.07618091607414443
+    }
+  ]
+}

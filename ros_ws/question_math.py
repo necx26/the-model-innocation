@@ -24,7 +24,11 @@ def demand_tool(question):
         if not clause or clause.lstrip().startswith(('题目:每','每','有','设')):continue
         # Names in the supplied generator are followed by discourse words as
         # well as verbs: e.g. ``小勇说和小壮一样`` and ``小康也和小壮一样``.
-        names=re.findall(r'小[\u4e00-\u9fff]{1,2}?(?=、|和|跟|都|与|需|想|领|购|订|要|说|也|一样|相同|借阅|借了|借|读|看|买|购买|租用|借用|拿|,|的)',clause)
+        # Subjects and comparison references precede the first quantity.
+        # Do not scan item quantities such as "4个小车,1个积木" for people.
+        subject_text=re.split(r'\d',clause,maxsplit=1)[0]
+        names=re.findall(r'小[\u4e00-\u9fff]{1,2}?(?=、|和|跟|都|与|需|想|领|购|订|要|说|也|一样|相同|借阅|借了|借|读|看|买|购买|租用|借用|拿|,|的)',subject_text)
+        names=[name for name in names if name not in items]
         if not names:raise ValueError('无法确定题目子句的主体：'+clause)
         counts=[0,0]
         relation=('一样' in clause or '相同' in clause)

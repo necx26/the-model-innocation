@@ -3,8 +3,9 @@ set -eo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/environment.sh"
 [[ -f "$YZBOT_WS/install/local_setup.bash" ]] || { echo '先执行 ./native/build.sh' >&2;exit 1; }
 if current=$(curl --noproxy '*' -sf http://127.0.0.1:8765/api/state); then
-  if python3 -c 'import json,sys; a=json.load(sys.stdin); sys.exit(0 if a.get("healthy") else 1)' <<< "$current"; then
+  if python3 -c 'import json,sys; a=json.load(sys.stdin); sys.exit(0 if a.get("healthy") and a.get("phase")!="重置失败" else 1)' <<< "$current"; then
     echo '工程已运行且机器人就绪：http://127.0.0.1:8765'
+    if [[ ${YZBOT_ENABLE_RVIZ:-1} == 1 ]]; then "$YZBOT_PROJECT/native/rviz.sh"; fi
     if [[ ${1:-} == --open ]]; then "$YZBOT_PROJECT/native/visualize.sh"; fi
     exit 0
   fi
@@ -31,22 +32,23 @@ echo '[3/4] 启动考试桥与第一人称观察页'
 launch controller python3 -u "$YZBOT_WS/competition_node.py"
 for _ in {1..60}; do curl --noproxy '*' -sf http://127.0.0.1:8765/api/state >/dev/null && break; sleep .5; done
 curl --noproxy '*' -sf http://127.0.0.1:8765/api/state >/dev/null
-curl --noproxy '*' -sf -X POST http://127.0.0.1:8765/api/reset >/dev/null
+curl --noproxy '*' -sf -X POST 'http://127.0.0.1:8765/api/reset?mode=fixed' >/dev/null
 python3 - <<'PY'
 import json,time,urllib.request
 op=urllib.request.build_opener(urllib.request.ProxyHandler({}))
-for _ in range(90):
+for _ in range(180):
     state=json.load(op.open('http://127.0.0.1:8765/api/state',timeout=3))
     if state['phase']=='重置失败':raise SystemExit(state['status'])
-    if state.get('layout_randomized') and state['phase']=='就绪':break
+    if state.get('layout_mode')=='fixed_distributed' and not state.get('layout_randomized') and state['phase']=='就绪':break
     time.sleep(.5)
-else:raise SystemExit('随机初始化场景超时')
+else:raise SystemExit('场景初始化超时')
 PY
 echo '[4/4] 本地可视化已就绪'
+if [[ ${YZBOT_ENABLE_RVIZ:-1} == 1 ]]; then "$YZBOT_PROJECT/native/rviz.sh"; fi
 # Optional compatibility bridge for existing external Foxglove clients.
 if [[ ${YZBOT_ENABLE_FOXGLOVE:-0} == 1 ]]; then
   launch foxglove python3 -u "$YZBOT_PROJECT/native/visualization_bridge.py"
 fi
-echo '就绪。先复位随机场景、确认规则与顺序；按开始考试才取题并开始300秒计时。'
+echo '场景已就绪。确认规则与顺序后，按开始考试才取题并开始300秒计时。'
 echo '面板 http://127.0.0.1:8765 | 第一人称 http://127.0.0.1:8765/fpv'
 if [[ ${1:-} == --open ]]; then "$YZBOT_PROJECT/native/visualize.sh"; fi

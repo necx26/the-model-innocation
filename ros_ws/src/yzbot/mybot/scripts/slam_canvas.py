@@ -28,7 +28,10 @@ class Canvas(Node):
         maps=Path(get_package_share_directory('bot_navigation'))/'maps'
         self.meta=yaml.safe_load((maps/'map.yaml').read_text())
         self.prior=cv2.imread(str(maps/self.meta['image']),0)
-        self.res=.05;self.xmin=-8.;self.ymin=-7.;self.width=320;self.height=280
+        # The canvas must cover the supplied map, including remote rooms.
+        self.res=float(self.meta['resolution'])
+        self.xmin,self.ymin=map(float,self.meta['origin'][:2])
+        self.height,self.width=self.prior.shape
         self.xs=self.xmin+np.arange(self.width)*self.res
         self.ys=self.ymin+np.arange(self.height)*self.res
         self.xx,self.yy=np.meshgrid(self.xs,self.ys)

@@ -1,0 +1,11 @@
+# Humble tf2 0.25.23 导航定位冻结修复
+
+上游来源：ROS geometry2 固定版本 `0.25.23` 的 `tf2/src/{buffer_core,cache,static_cache,time}.cpp`，保留各文件 BSD 许可证。仅修改 `BufferCore::testTransformableRequests()`：在内部锁保护下取出完成请求，然后释放锁，再调用外部回调。类布局和公共接口不变。
+
+现场证据：`planner_server` 的 TF 接收线程阻塞于 `testTransformableRequests → tf2_ros callback`；激光线程同时阻塞于 `waitForTransform → addTransformableRequest`。底盘实时 TF 在更新，Nav2 的 `published_footprint` 时间和位置却冻结。
+
+上游问题：<https://github.com/ros2/geometry2/issues/992>、<https://github.com/ros2/geometry2/issues/995>。
+
+这是项目维护的修复，不是上游已发布的修复。仅对安装版本 `0.25.23` 本地编译并加载；不替换 `/opt/ros` 文件。生成物放在本项目 `.runtime/tf2-fix`。启动时将该库目录加入本工程进程的 `LD_LIBRARY_PATH`。
+
+`lock_order_regression.cpp` 用两个线程确定性复现相反加锁顺序：原系统库会在外部 `timeout` 下超时，修复库应正常退出。另需验证实际 Nav2 位置持续更新和多轮完整考试。

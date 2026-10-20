@@ -6,7 +6,7 @@ if curl --noproxy '*' -sf "$url/health" >/dev/null; then echo '本地测试模�
 [[ "$url" == http://127.0.0.1:8081 ]] || { echo "自定义测试模型不可用：$url" >&2;exit 1; }
 server=${YZBOT_LLAMA_SERVER:-};model=${YZBOT_QWEN_MODEL:-}
 if [[ -z "$server" && -z "$model" ]]; then
-  for location in "$HOME/llama.cpp" "$HOME/yzbot_ros2_run/competition/llm" "$root/../../llama.cpp" "$root/models"; do
+  for location in "$root/.runtime/local-model" "$HOME/llama.cpp" "$root/../../llama.cpp" "$root/models"; do
     if [[ -x "$location/build/bin/llama-server" ]]; then candidate="$location/build/bin/llama-server";else candidate="$location/llama-server";fi
     if [[ -x "$candidate" && -f "$location/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf" ]]; then server="$candidate";model="$location/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf";break;fi
   done

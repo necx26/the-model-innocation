@@ -12,15 +12,25 @@ from scene_config import SCENE, ZONES, PATROLS
 
 
 def apply_world():
-    path = ROOT/'ros_ws/src/yzbot/mybot_description/worlds/competition.world'
+    path = ROOT/'ros_ws/src/yzbot/mybot_description/worlds'/SCENE.get('terrain_world', 'competition.world')
     tree = ET.parse(path); world = tree.getroot().find('world')
     models = {m.get('name'): m for m in world.findall('model')}
+    # Encode in Gazebo's process, before DDS: do not transfer 691 KB raw frames
+    # through the USB OS's small default UDP receive buffers.
+    for view in ('overview', 'oblique'):
+        sensor = models['competition_camera_'+view].find('link/sensor')
+        plugin = sensor.find("plugin[@name='"+view+"_compressed_camera']")
+        if plugin is None:
+            plugin = ET.SubElement(sensor, 'plugin', name=view+'_compressed_camera',
+                                   filename='libcompetition_camera_stream.so')
+            ET.SubElement(plugin, 'topic_name').text='/fixed_'+view+'/image_raw/compressed'
+            ET.SubElement(plugin, 'frame_name').text='fixed_'+view+'_camera'
     world.find("plugin[@name='competition_link_attacher']").set('filename','libgazebo_link_attacher.so')
-    # Distributed initial scene even before the startup random reset completes.
+    # Spawn the competition scene before the controller completes readiness.
     # Runtime search never reads this scene-generation data.
     from mission_strategy import MissionMap
     field=MissionMap(ROOT/'ros_ws/src/yzbot/bot_navigation/maps/map.yaml')
-    initial=field.scattered_layout(20261019)
+    initial=field.scattered_layout(4)
     for item in initial['layout']:
         models[item['model']].find('pose').text=f"{item['x']} {item['y']} .025 0 0 0"
     for name, (x,y) in ZONES.items():

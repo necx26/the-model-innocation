@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 source "$(dirname -- "${BASH_SOURCE[0]}")/environment.sh"
+bash "$YZBOT_PROJECT/native/build-tf2-fix.sh"
 python3 "$YZBOT_PROJECT/tools/configure_scene.py"
 cmake -S "$YZBOT_WS/src/yzbot/Move_Obs" -B "$YZBOT_WS/src/yzbot/Move_Obs/build" -DCMAKE_BUILD_TYPE=Release
 cmake --build "$YZBOT_WS/src/yzbot/Move_Obs/build" -j2

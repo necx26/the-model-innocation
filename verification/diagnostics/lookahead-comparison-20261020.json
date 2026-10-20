@@ -1,0 +1,26 @@
+[
+  {
+    "file": "nav-lookahead-baseline.jsonl",
+    "elapsed": 21.009,
+    "pose": [
+      -6.2436,
+      -6.6684,
+      2.2952
+    ],
+    "status": 4,
+    "metres": 12.17503219322826,
+    "turned": 9.574855921538758
+  },
+  {
+    "file": "nav-lookahead-1p2.jsonl",
+    "elapsed": 11.711,
+    "pose": [
+      -6.2155,
+      -6.616,
+      2.9413
+    ],
+    "status": 4,
+    "metres": 11.14451040513466,
+    "turned": 3.971085307179587
+  }
+]

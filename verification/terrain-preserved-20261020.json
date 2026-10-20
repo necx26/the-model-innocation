@@ -1,0 +1,15 @@
+{
+  "comparison": "XML subtrees after stripping formatting-only whitespace",
+  "source": "assets/terrain_v2/offic_room.world",
+  "checks": {
+    "world/model[@name='officeroom']": true,
+    "world/model[@name='Untitled']": true,
+    "world/state/model[@name='officeroom']": true,
+    "world/state/model[@name='Untitled']": true,
+    "world/gui": true,
+    "world/scene": true,
+    "world/physics": true,
+    "world/light": true
+  },
+  "all_preserved": true
+}

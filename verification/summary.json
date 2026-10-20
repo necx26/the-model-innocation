@@ -1,0 +1,44 @@
+[
+  {
+    "run": "release-unified-r21",
+    "passed": true,
+    "elapsed": 280.9,
+    "remaining": 19.1,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "physical_checks": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "source": "实时出题"
+  },
+  {
+    "run": "release-live-blue-r22",
+    "passed": true,
+    "elapsed": 246.2,
+    "remaining": 53.8,
+    "task": {
+      "red": 3,
+      "blue": 2,
+      "red_zone": "B",
+      "blue_zone": "A",
+      "first": "blue"
+    },
+    "physical_checks": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "source": "实时出题"
+  }
+]

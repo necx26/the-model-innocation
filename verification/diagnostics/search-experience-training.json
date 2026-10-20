@@ -1,0 +1,26 @@
+[
+  {
+    "report": "verification/mission_runs/tf2-braking-r1/round-1.json",
+    "sha256": "c2ab5783babc32867fadb7927c56f829a39c44c0a6d1ee018d19c7c31b5dd4a3",
+    "scenario": "fixed_distributed",
+    "source": "known_targets from camera tracks only",
+    "added": 5,
+    "map_key": "2a250eb07ce4f800"
+  },
+  {
+    "report": "verification/mission_runs/directional-release-r2/round-1.json",
+    "sha256": "e76e6319e23b511b77a46a77e910fdb3dc01efb7dbbd1f7098e6f9626fdfa5e9",
+    "scenario": "fixed_distributed",
+    "source": "known_targets from camera tracks only",
+    "added": 4,
+    "map_key": "2a250eb07ce4f800"
+  },
+  {
+    "survey": "verification/visual-survey-20261019-195908.json",
+    "sha256": "13913e9bfc24bd3ad3996a257bc9556f0879c3cf4966fae356e66e0bc8ae53ad",
+    "scenario": "fixed_distributed",
+    "source": "camera_tracks only; no ground truth input",
+    "added": 6,
+    "map_key": "2a250eb07ce4f800"
+  }
+]

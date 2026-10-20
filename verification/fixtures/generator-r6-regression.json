@@ -1,0 +1,14 @@
+{
+  "question": "题目: 每个玩具箱有5个玩具;有小车、积木两种玩具箱;小杰想玩3个小车,2个积木;小乐、小欣都想玩6个小车;小琪想玩3个小车,1个积木;小浩想玩1个积木。设小车玩具箱数量为x,积木玩具箱数量为y,计算x、y分别为多少。",
+  "context": {
+    "rule": 2,
+    "first": "blue",
+    "mapping_rule": "x、y中数量>=3的代表红色，另一种代表蓝色；x去B区，y去A区",
+    "generator_mode": "saved_generator_regression"
+  },
+  "provenance": {
+    "purpose": "repeat the earlier failing supplied-generator input; no answer included",
+    "report": "verification/mission_runs/fast-experience-hard-r6/round-1.json",
+    "report_sha256": "50ade4da149080d3f343a44660e58fcfbbac1af4e84d806d59fadd2bb5a288cf"
+  }
+}

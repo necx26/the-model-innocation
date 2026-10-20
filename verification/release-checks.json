@@ -1,0 +1,48 @@
+{
+  "normal_startup": true,
+  "normal_reset_without_query_parameters": true,
+  "phase": "就绪",
+  "task_mode": "exam",
+  "fresh_navigation": true,
+  "camera_frames_advanced_in_3s": {
+    "front": 36,
+    "overview": 36,
+    "oblique": 36
+  },
+  "rviz_healthy": true,
+  "rviz_displays": 8,
+  "loaded_source_matches": {
+    "ros_ws/competition_node.py": true,
+    "ros_ws/mission_strategy.py": true,
+    "ros_ws/search_memory.py": true,
+    "ros_ws/search_experience.py": true,
+    "ros_ws/robot_geometry.py": true,
+    "ros_ws/cube_perception.py": true,
+    "ros_ws/mission_review.py": true,
+    "ros_ws/scene_config.json": true,
+    "ros_ws/src/yzbot/bot_navigation/param/competition_nav2.yaml": true,
+    "native/restart-navigation.sh": true,
+    "native/navigation_process.py": true,
+    "native/wait_ready.py": true,
+    "native/start.sh": true
+  },
+  "scene_reset_max_position_difference_m": 1.89903119983383e-05,
+  "one_reset_button": true,
+  "only_user_markdown": "README.md",
+  "source_model_assets_git_ignored": true,
+  "retired_directory_absent": true,
+  "usb_touched": false,
+  "ui_sha256": "1fda6a52373a99e05da98fb780be5a6727120a86e7ccf7d23315c6456ce7793e",
+  "passed_rounds": [
+    {
+      "name": "release-unified-r21",
+      "elapsed": 280.9,
+      "final_checks": "5/5"
+    },
+    {
+      "name": "release-live-blue-r22",
+      "elapsed": 246.2,
+      "final_checks": "5/5"
+    }
+  ]
+}

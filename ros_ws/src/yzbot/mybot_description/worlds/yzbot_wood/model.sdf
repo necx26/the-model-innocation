@@ -1,0 +1,2 @@
+<?xml version="1.0"?>
+<sdf version="1.6"><model name="yzbot_wood"><static>true</static><link name="resources"/></model></sdf>

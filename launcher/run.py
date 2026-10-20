@@ -110,6 +110,10 @@ def runtime(dc):
     auth=Path(ENV.get('XAUTHORITY',f'/run/user/{os.getuid()}/gdm/Xauthority'))
     if not auth.is_file():raise RuntimeError('找不到桌面 Xauthority：'+str(auth))
     home=STATE/'container-home';home.mkdir(exist_ok=True)
+    official_config=ENV.get('YZBOT_OFFICIAL_CONFIG','')
+    if official_config:
+        try:official_config='/opt/yzbot/'+str(Path(official_config).resolve().relative_to(ROOT))
+        except ValueError:pass
     args=dc+['run','-d','--name',NAME,'--init','--network','host','--ipc','host',
         '--user',f'{os.getuid()}:{os.getgid()}',
         '-e','HOME=/opt/yzbot/.runtime/container-home','-e','DISPLAY='+display,
@@ -117,8 +121,10 @@ def runtime(dc):
         '-e','YZBOT_DOMAIN_ID='+ENV.get('YZBOT_DOMAIN_ID','91'),
         '-e','YZBOT_TASK_MODE='+ENV.get('YZBOT_TASK_MODE','exam'),
         '-e','YZBOT_OFFICIAL_ADAPTER='+ENV.get('YZBOT_OFFICIAL_ADAPTER','qwen_exam_adapter:solve_task'),
+        '-e','YZBOT_OFFICIAL_TIMEOUT='+ENV.get('YZBOT_OFFICIAL_TIMEOUT','45'),
+        '-e','YZBOT_OFFICIAL_CONFIG='+official_config,
         '-e','YZBOT_PRACTICE_LLM_URL='+ENV.get('YZBOT_PRACTICE_LLM_URL','http://127.0.0.1:8081'),
-        '-e','YZBOT_LOCALIZATION=slam','-e','LP_NUM_THREADS=4',
+        '-e','YZBOT_LOCALIZATION='+ENV.get('YZBOT_LOCALIZATION','slam'),'-e','LP_NUM_THREADS=4',
         '-v',str(ROOT)+':/opt/yzbot','-v',str(auth)+':/tmp/yzbot.xauth:ro',
         '-v','/tmp/.X11-unix:/tmp/.X11-unix','-w','/opt/yzbot',
         '--entrypoint','/bin/bash',IMAGE,'-c','exec sleep infinity']
@@ -127,7 +133,7 @@ def runtime(dc):
 
 def source_digest():
     h=hashlib.sha256()
-    for folder in ['ros_ws/src','native','tools']:
+    for folder in ['ros_ws/src','native','tools','runtime_fixes']:
         for path in sorted((ROOT/folder).rglob('*')):
             if not path.is_file() or any(x in path.parts for x in ('build','install','log','__pycache__')):continue
             if path.name!='cmake' and path.suffix not in ('.py','.sh','.xacro','.xml','.txt','.cpp','.h','.hpp','.yaml'):continue
@@ -146,7 +152,7 @@ def build(mode,dc,force=False):
     # Build products contain absolute prefixes. Move generated products aside when switching native/container roots.
     if stamp.exists() and not stamp.read_text().startswith(mode+':'+str(ROOT)+':'):
         backup=STATE/('previous-build-'+str(int(time.time())));backup.mkdir()
-        for rel in ['ros_ws/build','ros_ws/install','ros_ws/log','ros_ws/src/yzbot/Move_Obs/build']:
+        for rel in ['ros_ws/build','ros_ws/install','ros_ws/log','ros_ws/src/yzbot/Move_Obs/build','.runtime/tf2-fix']:
             p=ROOT/rel
             if p.exists():
                 dst=backup/rel;dst.parent.mkdir(parents=True,exist_ok=True);shutil.move(str(p),str(dst))
@@ -246,6 +252,7 @@ def main():
     while not state.get('healthy') and time.monotonic()<deadline:
         time.sleep(.5)
         state=api()
+    (LOG/'startup-camera-health.json').write_text(json.dumps(state,ensure_ascii=False,indent=2))
     if not state.get('healthy'):
         issue='、'.join(state.get('health_issues') or ['状态未就绪'])
         print('\n网页服务已启动，但机器人还未全部就绪：'+issue,flush=True)

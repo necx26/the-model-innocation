@@ -1,0 +1,9 @@
+{
+  "policy_version": 2,
+  "observed_regions": {
+    "red": 5,
+    "blue": 5
+  },
+  "training_reports": 3,
+  "source": "confirmed camera tracks only"
+}

@@ -1,0 +1,45 @@
+{
+  "purpose": "offline validation only; simulator entities never supplied survey goals or learned coordinates",
+  "survey": "verification/visual-survey-20261019-195908.json",
+  "live_track_count": 6,
+  "maximum_error_m": 0.0865,
+  "all_below_0p3_m": true,
+  "rows": [
+    {
+      "track": 1,
+      "color": "blue",
+      "nearest_validation_entity": "blue_cube_3",
+      "error_m": 0.0814
+    },
+    {
+      "track": 2,
+      "color": "red",
+      "nearest_validation_entity": "red_cube_5",
+      "error_m": 0.0109
+    },
+    {
+      "track": 3,
+      "color": "blue",
+      "nearest_validation_entity": "blue_cube_1",
+      "error_m": 0.0865
+    },
+    {
+      "track": 4,
+      "color": "red",
+      "nearest_validation_entity": "red_cube_4",
+      "error_m": 0.0578
+    },
+    {
+      "track": 5,
+      "color": "blue",
+      "nearest_validation_entity": "blue_cube_5",
+      "error_m": 0.0101
+    },
+    {
+      "track": 6,
+      "color": "blue",
+      "nearest_validation_entity": "blue_cube_4",
+      "error_m": 0.0099
+    }
+  ]
+}

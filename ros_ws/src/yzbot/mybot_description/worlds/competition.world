@@ -4018,7 +4018,7 @@
       <static>1</static>
     </model>
     <model name="red_cube_1">
-      <pose>5.3 -4.5 .025 0 0 0</pose>
+      <pose>9.2 3.6 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4069,7 +4069,7 @@
       </link>
     </model>
     <model name="red_cube_2">
-      <pose>-1.9 -3.9 .025 0 0 0</pose>
+      <pose>-13.0 3.6 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4120,7 +4120,7 @@
       </link>
     </model>
     <model name="red_cube_3">
-      <pose>-1.3 -0.3 .025 0 0 0</pose>
+      <pose>-1.0 -5.4 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4171,7 +4171,7 @@
       </link>
     </model>
     <model name="red_cube_4">
-      <pose>5.9 2.7 .025 0 0 0</pose>
+      <pose>3.2 -11.4 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4222,7 +4222,7 @@
       </link>
     </model>
     <model name="red_cube_5">
-      <pose>2.9 -2.7 .025 0 0 0</pose>
+      <pose>9.8 4.2 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4273,7 +4273,7 @@
       </link>
     </model>
     <model name="blue_cube_1">
-      <pose>-6.7 4.5 .025 0 0 0</pose>
+      <pose>7.4 -6.0 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4324,7 +4324,7 @@
       </link>
     </model>
     <model name="blue_cube_2">
-      <pose>5.9 1.5 .025 0 0 0</pose>
+      <pose>-13.0 -1.8 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4375,7 +4375,7 @@
       </link>
     </model>
     <model name="blue_cube_3">
-      <pose>-6.7 -2.1 .025 0 0 0</pose>
+      <pose>-5.8 -10.8 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4426,7 +4426,7 @@
       </link>
     </model>
     <model name="blue_cube_4">
-      <pose>4.7 5.7 .025 0 0 0</pose>
+      <pose>3.8 -13.2 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4477,7 +4477,7 @@
       </link>
     </model>
     <model name="blue_cube_5">
-      <pose>-6.1 5.7 .025 0 0 0</pose>
+      <pose>9.2 0.0 .025 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>.03</mass>
@@ -4529,7 +4529,7 @@
     </model>
     <model name="zone_a">
       <static>1</static>
-      <pose>-5.5 4.0 0.01 0 0 0</pose>
+      <pose>2.0 -6.0 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -4600,7 +4600,7 @@
     </model>
     <model name="zone_b">
       <static>1</static>
-      <pose>5.1 4.5 0.01 0 0 0</pose>
+      <pose>5.0 -2.4 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -4722,7 +4722,7 @@
     </model>
     <model name="zone_c">
       <static>1</static>
-      <pose>2.8 -4.0 0.01 0 0 0</pose>
+      <pose>-6.5 -2.0 0.01 0 0 0</pose>
       <link name="base">
         <visual name="visual">
           <geometry>
@@ -5019,10 +5019,10 @@
           </geometry>
         </visual>
       </link>
-      <pose>-3.35 -1.55 0.005 0 0 1.57079632679</pose>
+      <pose>-1.5 -6.4 0.005 0 0 1.57079632679</pose>
       <plugin name="competition_patrol" filename="libcompetition_patrol.so">
-        <start>-3.35 -1.55 0.005</start>
-        <end>-3.35 0.85 0.005</end>
+        <start>-1.5 -6.4 0.005</start>
+        <end>-1.5 -4.0 0.005</end>
         <period>28.0</period>
       </plugin>
       <static>true</static>
@@ -5247,10 +5247,10 @@
           </geometry>
         </visual>
       </link>
-      <pose>5.65 -0.75 0.005 0 0 1.57079632679</pose>
+      <pose>7.5 -5.2 0.005 0 0 1.57079632679</pose>
       <plugin name="competition_patrol" filename="libcompetition_patrol.so">
-        <start>5.65 -0.75 0.005</start>
-        <end>5.65 1.65 0.005</end>
+        <start>7.5 -5.2 0.005</start>
+        <end>9.9 -5.2 0.005</end>
         <period>26.0</period>
       </plugin>
       <static>true</static>

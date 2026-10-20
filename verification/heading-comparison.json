@@ -1,0 +1,20 @@
+{
+  "purpose": "same base_control location and heading target; Nav2 collision checking retained; not whole mission timing",
+  "measurement_note": "Odometry pose uses body origin; displacement must use TF base_control to avoid the 0.14m frame offset",
+  "records": [
+    {
+      "angular_speed_setting": 1.0,
+      "seconds": 2.1314526479982305,
+      "navigation_status": 4,
+      "translation_m": 7.795497982364508e-05,
+      "odometry_samples": 62
+    },
+    {
+      "angular_speed_setting": 1.4,
+      "seconds": 2.573256538998976,
+      "navigation_status": 4,
+      "translation_m": 0.0015011741333933856,
+      "odometry_samples": 75
+    }
+  ]
+}

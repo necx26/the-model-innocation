@@ -1,4 +1,6 @@
 import os
+import tempfile
+import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
@@ -17,11 +19,13 @@ def generate_launch_description():
     bringup = get_package_share_directory('nav2_bringup')
     mode=os.environ.get('YZBOT_LOCALIZATION','truth')
     if mode=='slam':
+        with open(os.path.join(nav,'maps','map.yaml')) as stream:
+            map_resolution=float(yaml.safe_load(stream)['resolution'])
         params_file=os.path.join(get_package_share_directory('slam_toolbox'),'config','mapper_params_online_async.yaml')
         localization=[
             Node(package='slam_toolbox', executable='async_slam_toolbox_node',name='slam_toolbox',output='screen',
                  parameters=[params_file,{'use_sim_time':True,'base_frame':'base_control','odom_frame':'odom','map_frame':'map',
-                    'scan_topic':'/scan','use_map_saver':False,'enable_interactive_mode':False,'map_update_interval':.5,
+                    'scan_topic':'/scan','resolution':map_resolution,'use_map_saver':False,'enable_interactive_mode':False,'map_update_interval':.5,
                     'minimum_time_interval':.1,'minimum_travel_distance':.2,'minimum_travel_heading':.15}],
                  remappings=[('/map','/slam/map'),('/map_metadata','/slam/map_metadata')]),
             Node(package='mybot',executable='slam_canvas.py',parameters=[{'use_sim_time':True}],output='screen')]
@@ -37,6 +41,19 @@ def generate_launch_description():
                  parameters=[{'use_sim_time':True,'autostart':True,'node_names':['patrol_map_server','practice_map_server']}]),
             Node(package='tf2_ros',executable='static_transform_publisher',name='simulation_world_alignment',
                  arguments=['0','0','0','0','0','0','map','odom'])]
+    # Use the competition recovery tree without Nav2's in-place Spin action.
+    # Static/dynamic obstacles should lead to costmap clearing, a brief wait,
+    # and a small backup before replanning around them.
+    params_path=os.path.join(nav, 'param', 'competition_nav2.yaml')
+    with open(params_path, encoding='utf-8') as stream:
+        nav_params=yaml.safe_load(stream)
+    nav_params['bt_navigator']['ros__parameters']['default_nav_to_pose_bt_xml']=os.path.join(
+        nav, 'config', 'competition_no_spin.xml')
+    nav_params['bt_navigator']['ros__parameters']['default_nav_through_poses_bt_xml']=os.path.join(
+        nav, 'config', 'competition_no_spin_through_poses.xml')
+    runtime_params=os.path.join(tempfile.gettempdir(), 'yzbot_competition_nav2.yaml')
+    with open(runtime_params, 'w', encoding='utf-8') as stream:
+        yaml.safe_dump(nav_params, stream, sort_keys=False)
     return LaunchDescription(localization+[
         Node(package='moveit_ros_move_group', executable='move_group', output='screen',
              parameters=[config.to_dict(), {'use_sim_time': True,
@@ -44,7 +61,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(bringup, 'launch', 'navigation_launch.py')),
             launch_arguments={'map': os.path.join(nav, 'maps', 'map.yaml'),
-                              'params_file': os.path.join(nav, 'param', 'competition_nav2.yaml'),
+                              'params_file': runtime_params,
                               'use_sim_time': 'true', 'use_composition': 'False',
                               'autostart': 'true'}.items()),
     ])

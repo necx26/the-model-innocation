@@ -1,0 +1,354 @@
+[
+  {
+    "run_id": "20261019-191913-677492",
+    "phase": "未完成",
+    "status": "MoveIt IK 无可行解: [0.412, -0.04, 0.32]",
+    "elapsed": 72.0,
+    "task": {
+      "red": 3,
+      "blue": 2,
+      "red_zone": "A",
+      "blue_zone": "C",
+      "first": "red"
+    },
+    "placed": 1,
+    "picked": 1,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-192213-331623",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 275.2,
+    "task": {
+      "red": 3,
+      "blue": 2,
+      "red_zone": "A",
+      "blue_zone": "C",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-193551-630488",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 299.5,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "A",
+      "blue_zone": "C",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-200248-900138",
+    "phase": "未完成",
+    "status": "已达到 5 分钟时限，停止作业",
+    "elapsed": 300.0,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "B",
+      "blue_zone": "A",
+      "first": "blue"
+    },
+    "placed": 4,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-200945-773692",
+    "phase": "未完成",
+    "status": "已达到 5 分钟时限，停止作业",
+    "elapsed": 300.1,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "B",
+      "blue_zone": "A",
+      "first": "blue"
+    },
+    "placed": 4,
+    "picked": 4,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-232507-52788",
+    "phase": "未完成",
+    "status": "MoveIt IK 无可行解: [0.086, 0.284, 0.3]",
+    "elapsed": 49.0,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "A",
+      "blue_zone": "B",
+      "first": "blue"
+    },
+    "placed": 1,
+    "picked": 1,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-232805-54556",
+    "phase": "未完成",
+    "status": "导航没有平移进展或反复转向，已取消当前路径",
+    "elapsed": 207.2,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "A",
+      "blue_zone": "B",
+      "first": "blue"
+    },
+    "placed": 3,
+    "picked": 4,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-233624-407285",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 247.4,
+    "task": {
+      "red": 3,
+      "blue": 2,
+      "red_zone": "A",
+      "blue_zone": "B",
+      "first": "blue"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-234104-461094",
+    "phase": "停止",
+    "status": "任务已停止",
+    "elapsed": 185.9,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 2,
+    "picked": 2,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-234743-940715",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 284.4,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-235338-257351",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 262.2,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "A",
+      "first": "blue"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261019-235840-209719",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 254.1,
+    "task": {
+      "red": 3,
+      "blue": 2,
+      "red_zone": "A",
+      "blue_zone": "B",
+      "first": "blue"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": null
+  },
+  {
+    "run_id": "20261020-000759-700420",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 260.0,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "B",
+      "blue_zone": "A",
+      "first": "blue"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-001325-688288",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 299.2,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-002315-837228",
+    "phase": "未完成",
+    "status": "已达到 5 分钟时限，停止作业",
+    "elapsed": 300.1,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 4,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-003250-700798",
+    "phase": "未完成",
+    "status": "安全停靠后仍无通过 IK 核验且可以退出的区内落点",
+    "elapsed": 290.0,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 4,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-004906-656752",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 281.2,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "B",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-005549-875216",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 234.7,
+    "task": {
+      "red": 4,
+      "blue": 1,
+      "red_zone": "A",
+      "blue_zone": "B",
+      "first": "blue"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-033853-909269",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 274.1,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "A",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-034631-450858",
+    "phase": "未完成",
+    "status": "已达到 5 分钟时限，停止作业",
+    "elapsed": 300.0,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "A",
+      "first": "red"
+    },
+    "placed": 3,
+    "picked": 3,
+    "grasp_attempts": 3
+  },
+  {
+    "run_id": "20261020-035248-656972",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 295.4,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "A",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  },
+  {
+    "run_id": "20261020-035905-433610",
+    "phase": "完成",
+    "status": "5 个分散货物已按指令完成搜索、抓取和放置，终检通过",
+    "elapsed": 282.3,
+    "task": {
+      "red": 2,
+      "blue": 3,
+      "red_zone": "C",
+      "blue_zone": "A",
+      "first": "red"
+    },
+    "placed": 5,
+    "picked": 5,
+    "grasp_attempts": 5
+  }
+]

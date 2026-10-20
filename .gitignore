@@ -20,7 +20,6 @@
 *.pt
 *.pth
 *.bin
-!/competition/platform/TMSCQtest_x86_x64.bin
 *llama-server*
 # Private adapter configuration / credentials
 .env
@@ -47,3 +46,10 @@ CMakeCache.txt
 /viewer-state/
 /.test-Xauthority
 /ros_ws/logs/
+
+# Project-local caches, generated build state, backups and temporary display credentials
+/.runtime/
+
+/runtime/*.tar.gz
+/dist/
+!/competition/platform/TMSCQtest_x86_x64.bin

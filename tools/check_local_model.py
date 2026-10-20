@@ -15,15 +15,15 @@ from qwen_exam_adapter import solve_task
 
 log=Path(os.environ.get('YZBOT_LOG',root/'logs'))/'independent-qwen-check'
 log.mkdir(parents=True,exist_ok=True)
-server=os.environ.get('YZBOT_LLAMA_SERVER',str(Path.home()/'llama.cpp/build/bin/llama-server'))
-model=os.environ.get('YZBOT_QWEN_MODEL',str(Path.home()/'llama.cpp/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'))
+server=os.environ.get('YZBOT_LLAMA_SERVER',str(root/'.runtime/local-model/llama-server'))
+model=os.environ.get('YZBOT_QWEN_MODEL',str(root/'.runtime/local-model/qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'))
 with socket.socket() as sock:
     sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
 os.environ['YZBOT_LOG']=str(log)
 os.environ['YZBOT_PRACTICE_LLM_URL']=f'http://127.0.0.1:{port}'
 op=urllib.request.build_opener(urllib.request.ProxyHandler({}))
 with (log/'llama-server.log').open('w') as output:
-    process=subprocess.Popen([server,'-m',model,'-c','4096','--threads','4','--host','127.0.0.1','--port',str(port)],stdout=output,stderr=subprocess.STDOUT)
+    process=subprocess.Popen([server,'-m',model,'-c','4096','--threads','4','--host','127.0.0.1','--port',str(port)],stdout=output,stderr=subprocess.STDOUT,env=dict(os.environ,LD_LIBRARY_PATH=str(Path(server).parent)+(':'+os.environ['LD_LIBRARY_PATH'] if os.environ.get('LD_LIBRARY_PATH') else '')))
     try:
         for _ in range(90):
             if process.poll() is not None:raise RuntimeError('Qwen 已退出，检查 '+str(log/'llama-server.log'))

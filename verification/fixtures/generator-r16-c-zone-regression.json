@@ -1,0 +1,14 @@
+{
+  "question": "题目: 每个果篮有5个水果;有苹果、橙子两种果篮。小芳想要2个苹果;小强想要3个橙子,2个苹果;小华说和小芳一样;小丽要3个橙子;小美也和小芳一样但是换成橙子;小刚想要2个苹果, 3个橙子。设苹果果篮数量为x,橙子果篮数量为y,计算x、y。",
+  "context": {
+    "rule": 3,
+    "first": "red",
+    "mapping_rule": "数量多的代表蓝色，少的代表红色；蓝色去B区，红色去C区",
+    "generator_mode": "saved_generator_regression"
+  },
+  "provenance": {
+    "purpose": "repeat the measured C-zone docking delay; no answer included",
+    "report": "verification/mission_runs/wrist-final-live-r16/round-1.json",
+    "report_sha256": "342bf510e2a8e6dcee635686073eaecf138b86261810c948cbf0a008ae8213f9"
+  }
+}

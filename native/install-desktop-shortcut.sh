@@ -7,15 +7,11 @@ python3 - "$project" "$desktop" <<'PY'
 from pathlib import Path
 import sys
 root=Path(sys.argv[1]);desktop=Path(sys.argv[2])
-def quoted(value):
-    return '"'+str(value).replace('\\','\\\\').replace('"','\\"').replace('`','\\`').replace('$','\\$').replace('%','%%')+'"'
-for title,script,args,icon in [('机器人比赛启动','start.sh',' --open','applications-engineering'),('机器人比赛关闭','stop.sh','','process-stop')]:
-    p=desktop/(title+'.desktop')
-    p.write_text('[Desktop Entry]\nType=Application\nName='+title+'\nExec=bash '+quoted(root/'native'/script)+args+'\nPath='+str(root)+'\nIcon='+icon+'\nTerminal=true\nCategories=Education;Science;\n')
-    p.chmod(0o755)
-    print(p)
+def quoted(p):return '"'+str(p).replace('\\','\\\\').replace('"','\\"').replace('`','\\`').replace('$','\\$').replace('%','%%')+'"'
+text='[Desktop Entry]\nVersion=1.0\nType=Application\nName=大模型机器人比赛\nComment=启动机器人比赛与可视化\nExec='+quoted(root/'桌面启动.sh')+'\nPath='+str(root)+'\nIcon='+str(root/'gazebo-robot.svg')+'\nTerminal=true\nStartupNotify=false\nCategories=Development;Science;\n'
+for p in (desktop/'大模型机器人比赛.desktop',root/'机器人比赛仿真.desktop'):
+ p.write_text(text);p.chmod(0o755)
+ print(p)
 PY
-for file in "$desktop/机器人比赛启动.desktop" "$desktop/机器人比赛关闭.desktop"; do
-  gio set "$file" metadata::trusted true 2>/dev/null || true
-done
-echo '首次双击若提示未信任，在文件右键菜单选择 Allow Launching。'
+gio set "$desktop/大模型机器人比赛.desktop" metadata::trusted true 2>/dev/null || true
+echo '快捷方式已指向当前工程；若提示未信任，右键选择允许启动。'
